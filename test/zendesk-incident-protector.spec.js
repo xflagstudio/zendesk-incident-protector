@@ -5,6 +5,18 @@ let should       = chai.should();
 
 let NGWordManager = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
 
+// mock URL class
+class URL {
+  constructor(arg) {
+    if (arg.includes('http')) {
+      return {};
+    } else {
+      throw new TypeError('URL');
+    }
+  }
+}
+global.URL = URL;
+
 // define window after require user.js
 global.window = {};
 window.localStorage = global.localStorage;

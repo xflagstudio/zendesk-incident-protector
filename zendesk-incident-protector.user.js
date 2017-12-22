@@ -26,8 +26,12 @@
       }
     }
     isValidConfigURL(arg) {
-      let urlRegExp = new RegExp('^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$');
-      return arg.match(urlRegExp) !== null;
+      try {
+        let url = new URL(arg);
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
   }
 
