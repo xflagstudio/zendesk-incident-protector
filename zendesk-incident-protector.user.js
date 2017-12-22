@@ -38,9 +38,6 @@
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
-    const isEmpty = (arg) => {
-      return arg === null || arg === undefined;
-    };
 
     let ngWordManager = new NGWordManager(localStorageKey);
     let runUserScript = () => {
