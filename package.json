@@ -1,0 +1,25 @@
+{
+  "name": "zendesk-incident-protector",
+  "version": "1.0.0",
+  "description": "Prevent replying to customer with specific NG keywords",
+  "main": "zendesk-incident-protector.user.js",
+  "scripts": {
+    "test": "$(npm bin)/mocha './test/zendesk-incident-protector.spec.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hashijun/zendesk-incident-protector.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hashijun/zendesk-incident-protector/issues"
+  },
+  "homepage": "https://github.com/hashijun/zendesk-incident-protector#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "mock-local-storage": "^1.0.5"
+  }
+}
