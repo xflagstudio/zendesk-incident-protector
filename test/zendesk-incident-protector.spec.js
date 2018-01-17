@@ -1,6 +1,9 @@
 let chai         = require('chai');
 let path         = require('path');
 let localStorage = require('mock-local-storage');
+let request      = require('superagent');
+let nock         = require('nock');
+let assert       = require('assert');
 let should       = chai.should();
 
 let NGWordManager = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
@@ -18,7 +21,7 @@ class URL {
 global.URL = URL;
 
 // define window after require user.js
-global.window = {};
+global.window = {superagent: request};
 window.localStorage = global.localStorage;
 
 describe('NGWordManager', () => {
@@ -26,6 +29,19 @@ describe('NGWordManager', () => {
   const configDomain    = 'https://path.to';
   const configPath      = '/config.json';
   const configURL       = configDomain + configPath;
+  const mockConfig      = {
+    'hosts': [
+      'aaa.zendesk.com',
+      'bbb.zendesk.com',
+      'ccc.zendesk.com'
+    ],
+    'targetWords': {
+      'common': ['test', 'memo'],
+      'aaa.zendesk.com': ['aaa'],
+      'bbb.zendesk.com': ['bbb'],
+      'ccc.zendesk.com': ['ccc']
+    }
+  };
 
   let ngWordManager;
 
@@ -85,6 +101,46 @@ describe('NGWordManager', () => {
     context('arg is not URL', () => {
       it('should return false', () => {
         ngWordManager.isValidConfigURL('not url').should.equal(false);
+      });
+    });
+  });
+
+  describe('fetchConfig', () => {
+    beforeEach(() => {
+      ngWordManager.setConfigURL(configURL);
+    });
+
+    context('GET config has been successfully finished', () => {
+      before(() => {
+        nock(configDomain).get(configPath).reply(200, mockConfig);
+      });
+
+      it('returns config', (done) => {
+        ngWordManager.fetchConfig()
+          .then((object) => {
+            assert.deepEqual(object, mockConfig);
+            done();
+          }).catch((error) => {
+            done(error);
+          });
+      });
+    });
+
+    context('GET config failed', () => {
+      before(() => {
+        nock(configDomain).get(configPath).reply(404);
+      });
+
+      it('throws error', (done) => {
+        let expectedMessage = '[Zendesk事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。';
+
+        ngWordManager.fetchConfig()
+          .then((object) => {
+            done(new Error('Expected to reject'));
+          }).catch((error) => {
+            error.message.should.equal(expectedMessage);
+            done();
+          }).catch(done);
       });
     });
   });
