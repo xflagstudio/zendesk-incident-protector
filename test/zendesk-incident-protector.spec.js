@@ -23,6 +23,10 @@ window.localStorage = global.localStorage;
 
 describe('NGWordManager', () => {
   const localStorageKey = 'testLocalStorageKey';
+  const configDomain    = 'https://path.to';
+  const configPath      = '/config.json';
+  const configURL       = configDomain + configPath;
+
   let ngWordManager;
 
   beforeEach(() => {
@@ -42,7 +46,7 @@ describe('NGWordManager', () => {
     });
     context('localStorage exists', () => {
       before(() => {
-        window.localStorage.setItem(localStorageKey, 'https://path/to/config.json');
+        window.localStorage.setItem(localStorageKey, configURL);
       });
 
       it('should return false', () => {
@@ -54,7 +58,7 @@ describe('NGWordManager', () => {
   describe('#setConfigURL', () => {
     context('arg is URL', () => {
       it('should set arg to localStorage', () => {
-        let arg = 'https://path/to/config.json';
+        let arg = configURL;
 
         ngWordManager.setConfigURL(arg);
         window.localStorage.getItem(localStorageKey).should.equal(arg);
@@ -74,7 +78,7 @@ describe('NGWordManager', () => {
   describe('#isValidConfigURL', () => {
     context('arg is URL', () => {
       it('should return true', () => {
-        ngWordManager.isValidConfigURL('https://path/to/config.json').should.equal(true);
+        ngWordManager.isValidConfigURL(configURL).should.equal(true);
       });
     });
 
