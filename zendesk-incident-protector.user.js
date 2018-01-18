@@ -50,6 +50,9 @@
           });
       });
     }
+    isTargetHost(config, host) {
+      return config.hosts.includes(host)
+    }
   }
 
   // execute UserScript on browser, and export NGWordManager class on test

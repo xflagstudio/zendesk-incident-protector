@@ -144,4 +144,24 @@ describe('NGWordManager', () => {
       });
     });
   });
+
+  describe('isTargetHost', () => {
+    let config = mockConfig;
+
+    context('host defined in config', () => {
+      let host = 'aaa.zendesk.com';
+
+      it('returns true', () => {
+        ngWordManager.isTargetHost(config, host).should.equal(true);
+      });
+    });
+
+    context('host not defined in config', () => {
+      let host = 'unknown.zendesk.com';
+
+      it('returns false', () => {
+        ngWordManager.isTargetHost(config, host).should.equal(false);
+      });
+    });
+  });
 });
