@@ -187,7 +187,7 @@ describe('NGWordManager', () => {
     });
 
     context('target words at host is not defined', () => {
-      it('judges target words defined on common and host', () => {
+      it('judges target words defined on common', () => {
         let host = 'ddd.zendesk.com';
 
         ngWordManager.isIncludeTargetWord(mockConfig, text1, host).should.equal(true);
