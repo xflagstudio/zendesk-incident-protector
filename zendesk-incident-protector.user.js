@@ -53,6 +53,15 @@
     isTargetHost(config, host) {
       return config.hosts.includes(host)
     }
+    isIncludeTargetWord(config, text, host) {
+      let commonTargetWords = config.targetWords.common;
+      let targetWords       = config.targetWords[host];
+
+      let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
+      let pattern        = new RegExp('(' + allTargetWords.join('|') + ')');
+
+      return text.match(pattern) ? true : false;
+    }
   }
 
   // execute UserScript on browser, and export NGWordManager class on test

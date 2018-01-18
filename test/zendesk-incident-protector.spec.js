@@ -33,7 +33,8 @@ describe('NGWordManager', () => {
     'hosts': [
       'aaa.zendesk.com',
       'bbb.zendesk.com',
-      'ccc.zendesk.com'
+      'ccc.zendesk.com',
+      'ddd.zendesk.com'
     ],
     'targetWords': {
       'common': ['test', 'memo'],
@@ -161,6 +162,37 @@ describe('NGWordManager', () => {
 
       it('returns false', () => {
         ngWordManager.isTargetHost(config, host).should.equal(false);
+      });
+    });
+  });
+
+  describe('isIncludeTargetWord', () => {
+    let config = mockConfig;
+
+    // text with word in common target words
+    let text1 = 'test hogehoge';
+    // text with word in target words of aaa.zendesk.com
+    let text2 = 'aaa hogehoge';
+    // text wituout target words
+    let text3 = 'hogehoge';
+
+    context('target words at host is defined', () => {
+      it('judges target words defined on common and host', () => {
+        let host = 'aaa.zendesk.com';
+
+        ngWordManager.isIncludeTargetWord(mockConfig, text1, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text2, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text3, host).should.equal(false);
+      });
+    });
+
+    context('target words at host is not defined', () => {
+      it('judges target words defined on common and host', () => {
+        let host = 'ddd.zendesk.com';
+
+        ngWordManager.isIncludeTargetWord(mockConfig, text1, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text2, host).should.equal(false);
+        ngWordManager.isIncludeTargetWord(mockConfig, text3, host).should.equal(false);
       });
     });
   });
