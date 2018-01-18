@@ -58,9 +58,8 @@
       let targetWords       = config.targetWords[host];
 
       let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
-      let pattern        = new RegExp('(' + allTargetWords.join('|') + ')');
 
-      return text.match(pattern) ? true : false;
+      return allTargetWords.some(word => text.includes(word));
     }
   }
 

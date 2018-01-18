@@ -38,7 +38,7 @@ describe('NGWordManager', () => {
     ],
     'targetWords': {
       'common': ['test', 'memo'],
-      'aaa.zendesk.com': ['aaa'],
+      'aaa.zendesk.com': ['(aaa|xxx)'],
       'bbb.zendesk.com': ['bbb'],
       'ccc.zendesk.com': ['ccc']
     }
@@ -172,9 +172,9 @@ describe('NGWordManager', () => {
     // text with word in common target words
     let text1 = 'test hogehoge';
     // text with word in target words of aaa.zendesk.com
-    let text2 = 'aaa hogehoge';
+    let text2 = '(aaa|xxx) hogehoge';
     // text without target words
-    let text3 = 'hogehoge';
+    let text3 = 'aaa hogehoge';
 
     context('target words at host is defined', () => {
       it('judges target words defined on common and host', () => {
