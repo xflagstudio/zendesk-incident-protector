@@ -173,7 +173,7 @@ describe('NGWordManager', () => {
     let text1 = 'test hogehoge';
     // text with word in target words of aaa.zendesk.com
     let text2 = 'aaa hogehoge';
-    // text wituout target words
+    // text without target words
     let text3 = 'hogehoge';
 
     context('target words at host is defined', () => {
