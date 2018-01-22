@@ -33,11 +33,12 @@ describe('NGWordManager', () => {
     'hosts': [
       'aaa.zendesk.com',
       'bbb.zendesk.com',
-      'ccc.zendesk.com'
+      'ccc.zendesk.com',
+      'ddd.zendesk.com'
     ],
     'targetWords': {
       'common': ['test', 'memo'],
-      'aaa.zendesk.com': ['aaa'],
+      'aaa.zendesk.com': ['(aaa|xxx)'],
       'bbb.zendesk.com': ['bbb'],
       'ccc.zendesk.com': ['ccc']
     }
@@ -141,6 +142,57 @@ describe('NGWordManager', () => {
             error.message.should.equal(expectedMessage);
             done();
           }).catch(done);
+      });
+    });
+  });
+
+  describe('isTargetHost', () => {
+    let config = mockConfig;
+
+    context('host defined in config', () => {
+      let host = 'aaa.zendesk.com';
+
+      it('returns true', () => {
+        ngWordManager.isTargetHost(config, host).should.equal(true);
+      });
+    });
+
+    context('host not defined in config', () => {
+      let host = 'unknown.zendesk.com';
+
+      it('returns false', () => {
+        ngWordManager.isTargetHost(config, host).should.equal(false);
+      });
+    });
+  });
+
+  describe('isIncludeTargetWord', () => {
+    let config = mockConfig;
+
+    // text with word in common target words
+    let text1 = 'test hogehoge';
+    // text with word in target words of aaa.zendesk.com
+    let text2 = '(aaa|xxx) hogehoge';
+    // text without target words
+    let text3 = 'aaa hogehoge';
+
+    context('target words at host is defined', () => {
+      it('judges target words defined on common and host', () => {
+        let host = 'aaa.zendesk.com';
+
+        ngWordManager.isIncludeTargetWord(mockConfig, text1, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text2, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text3, host).should.equal(false);
+      });
+    });
+
+    context('target words at host is not defined', () => {
+      it('judges target words defined on common', () => {
+        let host = 'ddd.zendesk.com';
+
+        ngWordManager.isIncludeTargetWord(mockConfig, text1, host).should.equal(true);
+        ngWordManager.isIncludeTargetWord(mockConfig, text2, host).should.equal(false);
+        ngWordManager.isIncludeTargetWord(mockConfig, text3, host).should.equal(false);
       });
     });
   });

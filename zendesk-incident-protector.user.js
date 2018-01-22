@@ -50,6 +50,17 @@
           });
       });
     }
+    isTargetHost(config, host) {
+      return config.hosts.includes(host)
+    }
+    isIncludeTargetWord(config, text, host) {
+      let commonTargetWords = config.targetWords.common;
+      let targetWords       = config.targetWords[host];
+
+      let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
+
+      return allTargetWords.some(word => text.includes(word));
+    }
   }
 
   // execute UserScript on browser, and export NGWordManager class on test
