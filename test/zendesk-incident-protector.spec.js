@@ -242,7 +242,7 @@ describe('NGWordManager', () => {
 
   describe('createConfirmText', () => {
     let text = $(NGWordManager.UI_CONSTANTS.selector.commentTextArea).html();
-    let expectedText = 'test\nmessage';
+    let expectedText = 'testmessage';
 
     it('returns confirm text', () => {
       let confirmText = ngWordManager.createConfirmText(text);

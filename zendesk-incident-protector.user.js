@@ -83,7 +83,7 @@
       let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
       let suffix = '\n\n本当に送信しますか？';
 
-      let rawText = text.replace(/<p>/g, '').replace(/<\/p>/g, '\n');
+      let rawText = $(text).text();
 
       return prefix + rawText + suffix;
     }
