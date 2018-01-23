@@ -22,7 +22,8 @@
     static get UI_CONSTANTS() {
       return {
         selector: {
-          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active'
+          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
+          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
         },
         attribute: {
           publicCommentClass: 'track-id-publicComment'
@@ -77,6 +78,14 @@
       let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
 
       return allTargetWords.some(word => text.includes(word));
+    }
+    createConfirmText(text) {
+      let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
+      let suffix = '\n\n本当に送信しますか？';
+
+      let rawText = text.replace(/<p>/g, '').replace(/<\/p>/g, '\n');
+
+      return prefix + rawText + suffix;
     }
   }
 

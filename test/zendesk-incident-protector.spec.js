@@ -18,6 +18,13 @@ const defaultDOM = new JSDOM(`
         <span class="ember-view btn track-id-publicComment active"></span>
         <span class="ember-view btn track-id-privateComment"></span>
       </div>
+      <div class="body">
+        <div class="ember-view">
+          <div class="editor">
+            <div class="zendesk-editor--rich-text-comment"><p>test</p><p>message</p></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -230,6 +237,17 @@ describe('NGWordManager', () => {
         ngWordManager.isIncludeTargetWord(mockConfig, text2, host).should.equal(false);
         ngWordManager.isIncludeTargetWord(mockConfig, text3, host).should.equal(false);
       });
+    });
+  });
+
+  describe('createConfirmText', () => {
+    let text = $(NGWordManager.UI_CONSTANTS.selector.commentTextArea).html();
+    let expectedText = 'test\nmessage';
+
+    it('returns confirm text', () => {
+      let confirmText = ngWordManager.createConfirmText(text);
+
+      confirmText.includes(expectedText).should.equal(true);
     });
   });
 });
