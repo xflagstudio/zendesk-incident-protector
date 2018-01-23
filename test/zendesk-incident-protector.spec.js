@@ -4,9 +4,24 @@ let localStorage = require('mock-local-storage');
 let request      = require('superagent');
 let nock         = require('nock');
 let assert       = require('assert');
+let jsdom        = require('jsdom');
 let should       = chai.should();
 
 let NGWordManager = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
+const { JSDOM } = jsdom;
+const defaultDOM = new JSDOM(`
+<!-- comment textarea -->
+<div class="comment_input_wrapper">
+  <div class="fr-focus">
+    <div class="content">
+      <div class="header">
+        <span class="ember-view btn track-id-publicComment active"></span>
+        <span class="ember-view btn track-id-privateComment"></span>
+      </div>
+    </div>
+  </div>
+</div>
+`);
 
 // mock URL class
 class URL {
@@ -21,7 +36,10 @@ class URL {
 global.URL = URL;
 
 // define window after require user.js
-global.window = {superagent: request};
+global.window = defaultDOM.window;
+global.$      = require('jquery');
+
+window.superagent   = request;
 window.localStorage = global.localStorage;
 
 describe('NGWordManager', () => {
@@ -146,6 +164,24 @@ describe('NGWordManager', () => {
     });
   });
 
+  describe('isPublicResponse', () => {
+    context('tab of public response has been selected', () => {
+      it('returns true', () => {
+        ngWordManager.isPublicResponse().should.equal(true);
+      });
+    });
+
+    context('tab of private response has been selected', () => {
+      before(() => {
+        $('span.track-id-publicComment').removeClass('active');
+        $('span.track-id-privateComment').addClass('active');
+      });
+
+      it('returns false', () => {
+        ngWordManager.isPublicResponse().should.equal(false);
+      });
+    });
+  });
   describe('isTargetHost', () => {
     let config = mockConfig;
 

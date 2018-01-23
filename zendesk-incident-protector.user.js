@@ -19,6 +19,17 @@
       this.request         = window.superagent;
     }
 
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active'
+        },
+        attribute: {
+          publicCommentClass: 'track-id-publicComment'
+        }
+      };
+    }
+
     isConfigURLEmpty() {
       let configURL = localStorage.getItem(this.localStorageKey);
       return configURL === null;
@@ -49,6 +60,12 @@
             reject(new Error('[Zendesk事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。'));
           });
       });
+    }
+    isPublicResponse() {
+      let publicCommentClass  = NGWordManager.UI_CONSTANTS.attribute.publicCommentClass;
+      let commentActionTarget = $(NGWordManager.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+
+      return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
     isTargetHost(config, host) {
       return config.hosts.includes(host)
