@@ -19,6 +19,18 @@
       this.request         = window.superagent;
     }
 
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
+          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
+        },
+        attribute: {
+          publicCommentClass: 'track-id-publicComment'
+        }
+      };
+    }
+
     isConfigURLEmpty() {
       let configURL = localStorage.getItem(this.localStorageKey);
       return configURL === null;
@@ -50,6 +62,12 @@
           });
       });
     }
+    isPublicResponse() {
+      let publicCommentClass  = NGWordManager.UI_CONSTANTS.attribute.publicCommentClass;
+      let commentActionTarget = $(NGWordManager.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+
+      return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
+    }
     isTargetHost(config, host) {
       return config.hosts.includes(host)
     }
@@ -60,6 +78,14 @@
       let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
 
       return allTargetWords.some(word => text.includes(word));
+    }
+    createConfirmText(text) {
+      let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
+      let suffix = '\n\n本当に送信しますか？';
+
+      let rawText = $(text).text();
+
+      return prefix + rawText + suffix;
     }
   }
 
