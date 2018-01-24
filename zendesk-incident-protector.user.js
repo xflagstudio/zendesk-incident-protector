@@ -13,6 +13,36 @@
 (function() {
   'use strict';
 
+  // TODO:
+  // fix to use CDN
+  // Add minified script to https://github.com/azu/wait-for-element.js
+  function waitForElement(selector) {
+    const timeout    = 10 * 1000; // 10s
+    const loopTime   = 100;
+    const limitCount = timeout / loopTime;
+
+    let tryCount = 0;
+
+    function tryCheck(resolve, reject) {
+      if (tryCount < limitCount) {
+        var element = document.querySelector(selector);
+        if (element != null) {
+          return resolve(element);
+        }
+        setTimeout(function () {
+          tryCheck(resolve, reject);
+        }, loopTime);
+      } else {
+        reject(new Error('Not found element match the selector:' + selector));
+      }
+      tryCount++;
+    }
+
+    return new Promise(function (resolve, reject) {
+      tryCheck(resolve, reject);
+    });
+  }
+
   class NGWordManager {
     constructor(localStorageKey) {
       this.localStorageKey = localStorageKey;
