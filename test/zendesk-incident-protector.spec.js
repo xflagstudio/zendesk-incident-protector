@@ -7,7 +7,9 @@ let assert       = require('assert');
 let jsdom        = require('jsdom');
 let should       = chai.should();
 
-let NGWordManager = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
+let exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
+let NGWordManager = exportedClass.NGWordManager;
+
 const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
 <!-- comment textarea -->

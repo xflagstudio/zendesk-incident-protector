@@ -113,6 +113,8 @@
 
     runUserScript();
   } else {
-    module.exports = NGWordManager;
+    module.exports = {
+      NGWordManager: NGWordManager
+    };
   }
 })();
