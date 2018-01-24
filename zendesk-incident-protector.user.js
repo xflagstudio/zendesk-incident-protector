@@ -61,6 +61,14 @@
       };
     }
 
+    get config() {
+      return this._config;
+    }
+
+    set config(arg) {
+      this._config = arg;
+    }
+
     isConfigURLEmpty() {
       let configURL = localStorage.getItem(this.localStorageKey);
       return configURL === null;
@@ -133,7 +141,7 @@
         ngWordManager.fetchConfig()
           .then(
             (object) => {
-              // ngWordManager.startValidation();
+              ngWordManager.config = object;
             }
           ).catch(
             (error) => { alert(error.message); }
