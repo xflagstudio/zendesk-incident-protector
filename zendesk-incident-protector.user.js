@@ -69,7 +69,7 @@
       return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
     isTargetHost(config, host) {
-      return config.hosts.includes(host)
+      return config.hosts.includes(host);
     }
     isIncludeTargetWord(config, text, host) {
       let commonTargetWords = config.targetWords.common;
