@@ -106,12 +106,12 @@
 
       return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
-    isTargetHost(config, host) {
-      return config.hosts.includes(host);
+    isTargetHost(host) {
+      return this.config.hosts.includes(host);
     }
-    isIncludeTargetWord(config, text, host) {
-      let commonTargetWords = config.targetWords.common;
-      let targetWords       = config.targetWords[host];
+    isIncludeTargetWord(text, host) {
+      let commonTargetWords = this.config.targetWords.common;
+      let targetWords       = this.config.targetWords[host];
 
       let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
 
