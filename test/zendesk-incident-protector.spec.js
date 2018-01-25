@@ -1,4 +1,5 @@
 let chai         = require('chai');
+let sinon        = require('sinon');
 let path         = require('path');
 let localStorage = require('mock-local-storage');
 let request      = require('superagent');
@@ -8,7 +9,9 @@ let jsdom        = require('jsdom');
 let should       = chai.should();
 
 let exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
-let NGWordManager = exportedClass.NGWordManager;
+
+let ValidatorManager = exportedClass.ValidatorManager;
+let NGWordManager    = exportedClass.NGWordManager;
 
 const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
@@ -30,6 +33,16 @@ const defaultDOM = new JSDOM(`
     </div>
   </div>
 </div>
+<!-- submit button -->
+<footer class="ticket-resolution-footer">
+  <div class="ticket-resolution-footer-pane">
+    <div id="ember1234" class="ticket_submit_buttons">
+      <button class="save">
+      submit
+      </button>
+    </div>
+  </div>
+</footer>
 `);
 
 // mock URL class
@@ -50,6 +63,62 @@ global.$      = require('jquery');
 
 window.superagent   = request;
 window.localStorage = global.localStorage;
+
+describe('ValidatorManager', () => {
+  const stub = sinon.stub($, 'filter');
+  const expectedButtonId = 'ember1234';
+
+  beforeEach(() => {
+    validatorManager = new ValidatorManager();
+
+    // NOTE:
+    // mock $.fn.filter, because :visible is not supported in jsdom
+    // ref. https://github.com/tmpvar/jsdom/issues/1048
+    stub.returns($(ValidatorManager.UI_CONSTANTS.selector.submitButton));
+  });
+
+  describe('getButtonId', () => {
+    it('returns id of parent element of button', () => {
+      validatorManager.getButtonId().should.equal(expectedButtonId);
+    });
+  });
+
+  describe('addValidator', () => {
+    it('adds button id into idsWithValidator', () => {
+      validatorManager.addValidator();
+      validatorManager.idsWithValidator.should.contain(expectedButtonId);
+    });
+  });
+
+  describe('hasValidator', () => {
+    context('before adding validator', () => {
+      it('returns false', () => {
+        let buttonId = expectedButtonId;
+        validatorManager.hasValidator(buttonId).should.equal(false);
+      });
+    });
+
+    context('after adding validator', () => {
+      beforeEach(() => {
+        validatorManager.addValidator();
+      });
+
+      context('with added button id', () => {
+        it('returns true', () => {
+          let buttonId = expectedButtonId;
+          validatorManager.hasValidator(buttonId).should.equal(true);
+        });
+      });
+
+      context('with not added button id', () => {
+        it('returns false', () => {
+          let buttonId = 'unknown';
+          validatorManager.hasValidator(buttonId).should.equal(false);
+        });
+      });
+    });
+  });
+});
 
 describe('NGWordManager', () => {
   const localStorageKey = 'testLocalStorageKey';

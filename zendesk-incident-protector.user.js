@@ -199,6 +199,7 @@
     runUserScript();
   } else {
     module.exports = {
+      ValidatorManager: ValidatorManager,
       NGWordManager: NGWordManager
     };
   }
