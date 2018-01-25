@@ -162,6 +162,12 @@
           .then(
             (object) => {
               ngWordManager.config = object;
+
+              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+            }
+          ).then(
+            (object) => {
+              console.log('submit button loaded!');
             }
           ).catch(
             (error) => { alert(error.message); }
