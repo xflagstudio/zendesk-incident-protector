@@ -43,6 +43,24 @@
     });
   }
 
+  // NOTE:
+  // Zendesk dashboard can show multiple tickets by separating tabs.
+  // This class manages whether to set validator or not with each tabs
+  // by recording id attribute of div tag on submit button.
+  class ValidatorManager {
+    constructor() {
+      this.idsWithValidator = [];
+    }
+
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          submitButton: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons button'
+        }
+      };
+    }
+  }
+
   class NGWordManager {
     constructor(localStorageKey) {
       this.localStorageKey = localStorageKey;
@@ -131,7 +149,9 @@
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
 
-    let ngWordManager = new NGWordManager(localStorageKey);
+    let ngWordManager    = new NGWordManager(localStorageKey);
+    let validatorManager = new ValidatorManager();
+
     let runUserScript = () => {
       if (ngWordManager.isConfigURLEmpty()) {
         let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
