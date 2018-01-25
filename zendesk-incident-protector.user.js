@@ -59,6 +59,26 @@
         }
       };
     }
+
+    getButtonId() {
+      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.submitButton).filter(':visible');
+      return submitButton.parent().attr('id');
+    }
+
+    addValidator() {
+      let buttonId = this.getButtonId();
+      if (buttonId !== undefined && !this.hasValidator(buttonId)) {
+        this.idsWithValidator.push(buttonId);
+        console.log('button id added. id:' + buttonId + ' idsWithValidator:' + this.idsWithValidator);
+
+        // TODO: add code
+        // new NGWordValidator(buttonId);
+      }
+    }
+
+    hasValidator(id) {
+      return this.idsWithValidator.includes(id);
+    }
   }
 
   class NGWordManager {
@@ -168,6 +188,7 @@
           ).then(
             (object) => {
               console.log('submit button loaded!');
+              validatorManager.addValidator();
             }
           ).catch(
             (error) => { alert(error.message); }
