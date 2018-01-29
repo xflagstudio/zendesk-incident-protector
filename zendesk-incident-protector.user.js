@@ -33,7 +33,7 @@
           tryCheck(resolve, reject);
         }, loopTime);
       } else {
-        reject(new Error('Not found element match the selector:' + selector));
+        reject(new Error(`Not found element match the selector:${selector}`));
       }
       tryCount++;
     }
@@ -69,7 +69,7 @@
       let buttonId = this.getButtonId();
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
-        console.log('button id added. id:' + buttonId + ' idsWithValidator:' + this.idsWithValidator);
+        console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
         // TODO: add code
         // new NGWordValidator(buttonId);
