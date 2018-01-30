@@ -13,6 +13,74 @@
 (function() {
   'use strict';
 
+  // TODO:
+  // fix to use CDN
+  // Add minified script to https://github.com/azu/wait-for-element.js
+  function waitForElement(selector) {
+    const timeout    = 10 * 1000; // 10s
+    const loopTime   = 100;
+    const limitCount = timeout / loopTime;
+
+    let tryCount = 0;
+
+    function tryCheck(resolve, reject) {
+      if (tryCount < limitCount) {
+        var element = document.querySelector(selector);
+        if (element != null) {
+          return resolve(element);
+        }
+        setTimeout(function () {
+          tryCheck(resolve, reject);
+        }, loopTime);
+      } else {
+        reject(new Error(`Not found element match the selector:${selector}`));
+      }
+      tryCount++;
+    }
+
+    return new Promise(function (resolve, reject) {
+      tryCheck(resolve, reject);
+    });
+  }
+
+  // NOTE:
+  // Zendesk dashboard can show multiple tickets by separating tabs.
+  // This class manages whether to set validator or not with each tabs
+  // by recording id attribute of div tag on submit button.
+  class ValidatorManager {
+    constructor() {
+      this.idsWithValidator = [];
+    }
+
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          submitButton: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons button'
+        }
+      };
+    }
+
+    getButtonId() {
+      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.submitButton).filter(':visible');
+      return submitButton.parent().attr('id');
+    }
+
+    addValidator() {
+      let buttonId = this.getButtonId();
+      if (buttonId !== undefined && !this.hasValidator(buttonId)) {
+        this.idsWithValidator.push(buttonId);
+        console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
+
+        // TODO: add code
+        // new NGWordValidator(buttonId);
+      }
+    }
+
+    hasValidator(id) {
+      return this.idsWithValidator.includes(id);
+    }
+  }
+
   class NGWordManager {
     constructor(localStorageKey) {
       this.localStorageKey = localStorageKey;
@@ -29,6 +97,14 @@
           publicCommentClass: 'track-id-publicComment'
         }
       };
+    }
+
+    get config() {
+      return this._config;
+    }
+
+    set config(arg) {
+      this._config = arg;
     }
 
     isConfigURLEmpty() {
@@ -68,12 +144,12 @@
 
       return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
-    isTargetHost(config, host) {
-      return config.hosts.includes(host)
+    isTargetHost(host) {
+      return this.config.hosts.includes(host);
     }
-    isIncludeTargetWord(config, text, host) {
-      let commonTargetWords = config.targetWords.common;
-      let targetWords       = config.targetWords[host];
+    isIncludeTargetWord(text, host) {
+      let commonTargetWords = this.config.targetWords.common;
+      let targetWords       = this.config.targetWords[host];
 
       let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
 
@@ -93,7 +169,9 @@
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
 
-    let ngWordManager = new NGWordManager(localStorageKey);
+    let ngWordManager    = new NGWordManager(localStorageKey);
+    let validatorManager = new ValidatorManager();
+
     let runUserScript = () => {
       if (ngWordManager.isConfigURLEmpty()) {
         let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
@@ -103,7 +181,14 @@
         ngWordManager.fetchConfig()
           .then(
             (object) => {
-              // ngWordManager.startValidation();
+              ngWordManager.config = object;
+
+              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+            }
+          ).then(
+            (object) => {
+              console.log('submit button loaded!');
+              validatorManager.addValidator();
             }
           ).catch(
             (error) => { alert(error.message); }
@@ -113,6 +198,9 @@
 
     runUserScript();
   } else {
-    module.exports = NGWordManager;
+    module.exports = {
+      ValidatorManager: ValidatorManager,
+      NGWordManager: NGWordManager
+    };
   }
 })();
