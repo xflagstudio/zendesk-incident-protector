@@ -242,24 +242,6 @@ describe('NGWordManager', () => {
     });
   });
 
-  describe('isPublicResponse', () => {
-    context('tab of public response has been selected', () => {
-      it('returns true', () => {
-        ngWordManager.isPublicResponse().should.equal(true);
-      });
-    });
-
-    context('tab of private response has been selected', () => {
-      before(() => {
-        $('span.track-id-publicComment').removeClass('active');
-        $('span.track-id-privateComment').addClass('active');
-      });
-
-      it('returns false', () => {
-        ngWordManager.isPublicResponse().should.equal(false);
-      });
-    });
-  });
   describe('isTargetHost', () => {
     beforeEach(() => {
       ngWordManager.config = mockConfig;
@@ -279,50 +261,6 @@ describe('NGWordManager', () => {
       it('returns false', () => {
         ngWordManager.isTargetHost(host).should.equal(false);
       });
-    });
-  });
-
-  describe('isIncludeTargetWord', () => {
-    beforeEach(() => {
-      ngWordManager.config = mockConfig;
-    });
-
-    // text with word in common target words
-    let text1 = 'test hogehoge';
-    // text with word in target words of aaa.zendesk.com
-    let text2 = '(aaa|xxx) hogehoge';
-    // text without target words
-    let text3 = 'aaa hogehoge';
-
-    context('target words at host is defined', () => {
-      it('judges target words defined on common and host', () => {
-        let host = 'aaa.zendesk.com';
-
-        ngWordManager.isIncludeTargetWord(text1, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text2, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text3, host).should.equal(false);
-      });
-    });
-
-    context('target words at host is not defined', () => {
-      it('judges target words defined on common', () => {
-        let host = 'ddd.zendesk.com';
-
-        ngWordManager.isIncludeTargetWord(text1, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text2, host).should.equal(false);
-        ngWordManager.isIncludeTargetWord(text3, host).should.equal(false);
-      });
-    });
-  });
-
-  describe('createConfirmText', () => {
-    let text = $(NGWordManager.UI_CONSTANTS.selector.commentTextArea).html();
-    let expectedText = 'testmessage';
-
-    it('returns confirm text', () => {
-      let confirmText = ngWordManager.createConfirmText(text);
-
-      confirmText.includes(expectedText).should.equal(true);
     });
   });
 });
