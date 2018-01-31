@@ -12,6 +12,7 @@ let exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protect
 
 let ValidatorManager = exportedClass.ValidatorManager;
 let NGWordManager    = exportedClass.NGWordManager;
+let NGWordValidator  = exportedClass.NGWordValidator;
 
 const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
@@ -261,6 +262,67 @@ describe('NGWordManager', () => {
       it('returns false', () => {
         ngWordManager.isTargetHost(host).should.equal(false);
       });
+    });
+  });
+});
+
+describe('NGWordValidator', () => {
+  const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.submitButton;
+  const targetWords = ['test', 'memo', '(aaa|xxx)']
+
+  let ngWordValidator;
+
+  beforeEach(() => {
+    ngWordValidator = new NGWordValidator(targetDOM, targetWords);
+  });
+
+  describe('isPublicResponse', () => {
+    context('tab of public response has been selected', () => {
+      it('returns true', () => {
+        ngWordValidator.isPublicResponse().should.equal(true);
+      });
+    });
+
+    context('tab of private response has been selected', () => {
+      before(() => {
+        $('span.track-id-publicComment').removeClass('active');
+        $('span.track-id-privateComment').addClass('active');
+      });
+
+      after(() => {
+        $('span.track-id-publicComment').addClass('active');
+        $('span.track-id-privateComment').removeClass('active');
+      });
+
+      it('returns false', () => {
+        ngWordValidator.isPublicResponse().should.equal(false);
+      });
+    });
+  });
+
+  describe('isIncludeTargetWord', () => {
+    // text with word in common target words
+    let text1 = 'test hogehoge';
+    // text with word in target words of aaa.zendesk.com
+    let text2 = '(aaa|xxx) hogehoge';
+    // text without target words
+    let text3 = 'aaa hogehoge';
+
+    it('judges target words', () => {
+      ngWordValidator.isIncludeTargetWord(text1).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text2).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text3).should.equal(false);
+    });
+  });
+
+  describe('createConfirmText', () => {
+    let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).html();
+    let expectedText = 'testmessage';
+
+    it('returns confirm text', () => {
+      let confirmText = ngWordValidator.createConfirmText(text);
+
+      confirmText.includes(expectedText).should.equal(true);
     });
   });
 });

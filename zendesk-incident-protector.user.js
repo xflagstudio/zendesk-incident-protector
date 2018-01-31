@@ -131,6 +131,45 @@
     }
   }
 
+  class NGWordValidator {
+    constructor(targetDOM, targetWords) {
+      this.targetDOM   = targetDOM;
+      this.targetWords = targetWords;
+    }
+
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
+          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
+        },
+        attribute: {
+          publicCommentClass: 'track-id-publicComment'
+        }
+      };
+    }
+
+    isPublicResponse() {
+      let publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
+      let commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+
+      return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
+    }
+
+    isIncludeTargetWord(text) {
+      return this.targetWords.some(word => text.includes(word));
+    }
+
+    createConfirmText(text) {
+      let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
+      let suffix = '\n\n本当に送信しますか？';
+
+      let rawText = $(text).text();
+
+      return prefix + rawText + suffix;
+    }
+  }
+
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
@@ -166,7 +205,8 @@
   } else {
     module.exports = {
       ValidatorManager: ValidatorManager,
-      NGWordManager: NGWordManager
+      NGWordManager: NGWordManager,
+      NGWordValidator: NGWordValidator
     };
   }
 })();
