@@ -86,7 +86,9 @@ describe('ValidatorManager', () => {
 
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
-      validatorManager.addValidator();
+      const targetWords = ['test', 'memo', '(aaa|xxx)'];
+
+      validatorManager.addValidator(targetWords);
       validatorManager.idsWithValidator.should.contain(expectedButtonId);
     });
   });

@@ -65,14 +65,14 @@
       return submitButton.parent().attr('id');
     }
 
-    addValidator() {
+    addValidator(targetWords) {
       let buttonId = this.getButtonId();
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        // TODO: add code
-        // new NGWordValidator(buttonId);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.submitButton}:visible`, targetWords);
+        validator.run();
       }
     }
 
@@ -155,6 +155,30 @@
       };
     }
 
+    run() {
+      const that = this;
+      let preventEvent = true;
+
+      $(that.targetDOM).on('click', function(event) {
+        let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+
+        if (that.isPublicResponse() && that.isIncludeTargetWord(text) && preventEvent) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          let confirmText = that.createConfirmText(text);
+
+          if (!confirm(confirmText)) {
+            return false;
+          } else {
+            preventEvent = false;
+            $(this).trigger('click');
+            preventEvent = true;
+          }
+        }
+      });
+    }
+
     isPublicResponse() {
       let publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
       let commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
@@ -179,6 +203,7 @@
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
+    const host            = location.host;
 
     let ngWordManager    = new NGWordManager(localStorageKey);
     let validatorManager = new ValidatorManager();
@@ -199,7 +224,9 @@
           ).then(
             (object) => {
               console.log('submit button loaded!');
-              validatorManager.addValidator();
+
+              const targetWords = ngWordManager.toTargetWords(host);
+              validatorManager.addValidator(targetWords);
             }
           ).catch(
             (error) => { alert(error.message); }
