@@ -241,6 +241,30 @@ describe('NGWordManager', () => {
           }).catch(done);
       });
     });
+
+    describe('toTargetWords', () => {
+      beforeEach(() => {
+        ngWordManager.config = mockConfig;
+      });
+
+      context('target words at host is defined', () => {
+        it('returns target words defined on common and host', () => {
+          let host = 'aaa.zendesk.com';
+          let expected = ['test', 'memo', '(aaa|xxx)'];
+
+          ngWordManager.toTargetWords(host).should.eql(expected);
+        });
+      });
+
+      context('target words at host is not defined', () => {
+        it('returns target words defined on common', () => {
+          let host = 'ddd.zendesk.com';
+          let expected = ['test', 'memo'];
+
+          ngWordManager.toTargetWords(host).should.eql(expected);
+        });
+      });
+    });
   });
 
   describe('isTargetHost', () => {

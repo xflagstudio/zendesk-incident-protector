@@ -129,6 +129,12 @@
     isTargetHost(host) {
       return this.config.hosts.includes(host);
     }
+    toTargetWords(host) {
+      const commonTargetWords = this.config.targetWords.common;
+      const targetWords       = this.config.targetWords[host];
+
+      return Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
+    }
   }
 
   class NGWordValidator {
