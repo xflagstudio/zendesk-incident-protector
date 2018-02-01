@@ -73,6 +73,8 @@
 
         let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.submitButton}:visible`, targetWords);
         validator.run();
+
+        return validator;
       }
     }
 
