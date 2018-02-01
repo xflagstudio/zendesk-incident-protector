@@ -12,6 +12,7 @@ let exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protect
 
 let ValidatorManager = exportedClass.ValidatorManager;
 let NGWordManager    = exportedClass.NGWordManager;
+let NGWordValidator  = exportedClass.NGWordValidator;
 
 const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
@@ -85,7 +86,11 @@ describe('ValidatorManager', () => {
 
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
-      validatorManager.addValidator();
+      const targetWords = ['test', 'memo', '(aaa|xxx)'];
+
+      let validator = validatorManager.addValidator(targetWords);
+
+      (validator instanceof NGWordValidator).should.equal(true);
       validatorManager.idsWithValidator.should.contain(expectedButtonId);
     });
   });
@@ -240,26 +245,32 @@ describe('NGWordManager', () => {
           }).catch(done);
       });
     });
-  });
 
-  describe('isPublicResponse', () => {
-    context('tab of public response has been selected', () => {
-      it('returns true', () => {
-        ngWordManager.isPublicResponse().should.equal(true);
+    describe('toTargetWords', () => {
+      beforeEach(() => {
+        ngWordManager.config = mockConfig;
+      });
+
+      context('target words at host is defined', () => {
+        it('returns target words defined on common and host', () => {
+          let host = 'aaa.zendesk.com';
+          let expected = ['test', 'memo', '(aaa|xxx)'];
+
+          ngWordManager.toTargetWords(host).should.eql(expected);
+        });
+      });
+
+      context('target words at host is not defined', () => {
+        it('returns target words defined on common', () => {
+          let host = 'ddd.zendesk.com';
+          let expected = ['test', 'memo'];
+
+          ngWordManager.toTargetWords(host).should.eql(expected);
+        });
       });
     });
-
-    context('tab of private response has been selected', () => {
-      before(() => {
-        $('span.track-id-publicComment').removeClass('active');
-        $('span.track-id-privateComment').addClass('active');
-      });
-
-      it('returns false', () => {
-        ngWordManager.isPublicResponse().should.equal(false);
-      });
-    });
   });
+
   describe('isTargetHost', () => {
     beforeEach(() => {
       ngWordManager.config = mockConfig;
@@ -281,12 +292,43 @@ describe('NGWordManager', () => {
       });
     });
   });
+});
 
-  describe('isIncludeTargetWord', () => {
-    beforeEach(() => {
-      ngWordManager.config = mockConfig;
+describe('NGWordValidator', () => {
+  const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.submitButton;
+  const targetWords = ['test', 'memo', '(aaa|xxx)']
+
+  let ngWordValidator;
+
+  beforeEach(() => {
+    ngWordValidator = new NGWordValidator(targetDOM, targetWords);
+  });
+
+  describe('isPublicResponse', () => {
+    context('tab of public response has been selected', () => {
+      it('returns true', () => {
+        ngWordValidator.isPublicResponse().should.equal(true);
+      });
     });
 
+    context('tab of private response has been selected', () => {
+      before(() => {
+        $('span.track-id-publicComment').removeClass('active');
+        $('span.track-id-privateComment').addClass('active');
+      });
+
+      after(() => {
+        $('span.track-id-publicComment').addClass('active');
+        $('span.track-id-privateComment').removeClass('active');
+      });
+
+      it('returns false', () => {
+        ngWordValidator.isPublicResponse().should.equal(false);
+      });
+    });
+  });
+
+  describe('isIncludeTargetWord', () => {
     // text with word in common target words
     let text1 = 'test hogehoge';
     // text with word in target words of aaa.zendesk.com
@@ -294,33 +336,19 @@ describe('NGWordManager', () => {
     // text without target words
     let text3 = 'aaa hogehoge';
 
-    context('target words at host is defined', () => {
-      it('judges target words defined on common and host', () => {
-        let host = 'aaa.zendesk.com';
-
-        ngWordManager.isIncludeTargetWord(text1, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text2, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text3, host).should.equal(false);
-      });
-    });
-
-    context('target words at host is not defined', () => {
-      it('judges target words defined on common', () => {
-        let host = 'ddd.zendesk.com';
-
-        ngWordManager.isIncludeTargetWord(text1, host).should.equal(true);
-        ngWordManager.isIncludeTargetWord(text2, host).should.equal(false);
-        ngWordManager.isIncludeTargetWord(text3, host).should.equal(false);
-      });
+    it('judges target words', () => {
+      ngWordValidator.isIncludeTargetWord(text1).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text2).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text3).should.equal(false);
     });
   });
 
   describe('createConfirmText', () => {
-    let text = $(NGWordManager.UI_CONSTANTS.selector.commentTextArea).html();
+    let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).html();
     let expectedText = 'testmessage';
 
     it('returns confirm text', () => {
-      let confirmText = ngWordManager.createConfirmText(text);
+      let confirmText = ngWordValidator.createConfirmText(text);
 
       confirmText.includes(expectedText).should.equal(true);
     });

@@ -65,14 +65,16 @@
       return submitButton.parent().attr('id');
     }
 
-    addValidator() {
+    addValidator(targetWords) {
       let buttonId = this.getButtonId();
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        // TODO: add code
-        // new NGWordValidator(buttonId);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.submitButton}:visible`, targetWords);
+        validator.run();
+
+        return validator;
       }
     }
 
@@ -85,18 +87,6 @@
     constructor(localStorageKey) {
       this.localStorageKey = localStorageKey;
       this.request         = window.superagent;
-    }
-
-    static get UI_CONSTANTS() {
-      return {
-        selector: {
-          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
-          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
-        },
-        attribute: {
-          publicCommentClass: 'track-id-publicComment'
-        }
-      };
     }
 
     get config() {
@@ -138,23 +128,70 @@
           });
       });
     }
-    isPublicResponse() {
-      let publicCommentClass  = NGWordManager.UI_CONSTANTS.attribute.publicCommentClass;
-      let commentActionTarget = $(NGWordManager.UI_CONSTANTS.selector.commentActionTarget).attr('class');
-
-      return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
-    }
     isTargetHost(host) {
       return this.config.hosts.includes(host);
     }
-    isIncludeTargetWord(text, host) {
-      let commonTargetWords = this.config.targetWords.common;
-      let targetWords       = this.config.targetWords[host];
+    toTargetWords(host) {
+      const commonTargetWords = this.config.targetWords.common;
+      const targetWords       = this.config.targetWords[host];
 
-      let allTargetWords = Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
-
-      return allTargetWords.some(word => text.includes(word));
+      return Array.isArray(targetWords) ? commonTargetWords.concat(targetWords) : commonTargetWords;
     }
+  }
+
+  class NGWordValidator {
+    constructor(targetDOM, targetWords) {
+      this.targetDOM   = targetDOM;
+      this.targetWords = targetWords;
+    }
+
+    static get UI_CONSTANTS() {
+      return {
+        selector: {
+          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
+          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
+        },
+        attribute: {
+          publicCommentClass: 'track-id-publicComment'
+        }
+      };
+    }
+
+    run() {
+      const that = this;
+      let preventEvent = true;
+
+      $(that.targetDOM).on('click', function(event) {
+        let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+
+        if (that.isPublicResponse() && that.isIncludeTargetWord(text) && preventEvent) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          let confirmText = that.createConfirmText(text);
+
+          if (!confirm(confirmText)) {
+            return false;
+          } else {
+            preventEvent = false;
+            $(this).trigger('click');
+            preventEvent = true;
+          }
+        }
+      });
+    }
+
+    isPublicResponse() {
+      let publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
+      let commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+
+      return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
+    }
+
+    isIncludeTargetWord(text) {
+      return this.targetWords.some(word => text.includes(word));
+    }
+
     createConfirmText(text) {
       let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
       let suffix = '\n\n本当に送信しますか？';
@@ -168,6 +205,7 @@
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
     const localStorageKey = 'zendeskIncidentProtectorConfigURL';
+    const host            = location.host;
 
     let ngWordManager    = new NGWordManager(localStorageKey);
     let validatorManager = new ValidatorManager();
@@ -188,7 +226,9 @@
           ).then(
             (object) => {
               console.log('submit button loaded!');
-              validatorManager.addValidator();
+
+              const targetWords = ngWordManager.toTargetWords(host);
+              validatorManager.addValidator(targetWords);
             }
           ).catch(
             (error) => { alert(error.message); }
@@ -200,7 +240,8 @@
   } else {
     module.exports = {
       ValidatorManager: ValidatorManager,
-      NGWordManager: NGWordManager
+      NGWordManager: NGWordManager,
+      NGWordValidator: NGWordValidator
     };
   }
 })();
