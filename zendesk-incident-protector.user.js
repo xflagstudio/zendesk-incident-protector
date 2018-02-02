@@ -43,6 +43,12 @@
     });
   }
 
+  class NotTargetHost extends Error {
+    constructor(message) {
+      super(message);
+    }
+  }
+
   // NOTE:
   // Zendesk dashboard can show multiple tickets by separating tabs.
   // This class manages whether to set validator or not with each tabs
@@ -221,7 +227,11 @@
             (object) => {
               ngWordManager.config = object;
 
-              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+              if (ngWordManager.isTargetHost(host)) {
+                return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+              } else {
+                return Promise.reject(new NotTargetHost());
+              }
             }
           ).then(
             (object) => {
@@ -230,9 +240,14 @@
               const targetWords = ngWordManager.toTargetWords(host);
               validatorManager.addValidator(targetWords);
             }
-          ).catch(
-            (error) => { alert(error.message); }
-          );
+          )
+          .catch((error) => {
+            if (error instanceof NotTargetHost) {
+              console.log('This zendesk instance is not target host for validation.');
+            } else {
+              alert(error.message);
+            }
+          });
       }
     };
 
