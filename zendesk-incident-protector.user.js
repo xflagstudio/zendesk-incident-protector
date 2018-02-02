@@ -222,33 +222,37 @@
 
         ngWordManager.setConfigURL(configURL);
       } else {
-        ngWordManager.fetchConfig()
-          .then(
-            (object) => {
-              ngWordManager.config = object;
-
-              if (ngWordManager.isTargetHost(host)) {
-                return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
-              } else {
-                return Promise.reject(new NotTargetHost());
-              }
-            }
-          ).then(
-            (object) => {
-              console.log('submit button loaded!');
-
-              const targetWords = ngWordManager.toTargetWords(host);
-              validatorManager.addValidator(targetWords);
-            }
-          )
-          .catch((error) => {
-            if (error instanceof NotTargetHost) {
-              console.log('This zendesk instance is not target host for validation.');
-            } else {
-              alert(error.message);
-            }
-          });
+        startValidation(ngWordManager, validatorManager);
       }
+    };
+
+    let startValidation = (ngWordManager, validatorManager) => {
+      ngWordManager.fetchConfig()
+        .then(
+          (object) => {
+            ngWordManager.config = object;
+
+            if (ngWordManager.isTargetHost(host)) {
+              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+            } else {
+              return Promise.reject(new NotTargetHost());
+            }
+          }
+        ).then(
+          (object) => {
+            console.log('submit button loaded!');
+
+            const targetWords = ngWordManager.toTargetWords(host);
+            validatorManager.addValidator(targetWords);
+          }
+        )
+        .catch((error) => {
+          if (error instanceof NotTargetHost) {
+            console.log('This zendesk instance is not target host for validation.');
+          } else {
+            alert(error.message);
+          }
+        });
     };
 
     runUserScript();
