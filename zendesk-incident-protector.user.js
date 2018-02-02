@@ -221,8 +221,10 @@
       if (ngWordManager.isConfigURLEmpty()) {
         let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
 
-        ngWordManager.setConfigURL(configURL);
-      } else {
+        ngWordManager.configURL = configURL;
+      }
+
+      if (!ngWordManager.isConfigURLEmpty()) {
         startValidation(ngWordManager, validatorManager);
       }
     };
