@@ -217,18 +217,6 @@
     let ngWordManager    = new NGWordManager(localStorageKey);
     let validatorManager = new ValidatorManager();
 
-    let runUserScript = () => {
-      if (ngWordManager.isConfigURLEmpty()) {
-        let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
-
-        ngWordManager.configURL = configURL;
-      }
-
-      if (!ngWordManager.isConfigURLEmpty()) {
-        startValidation(ngWordManager, validatorManager);
-      }
-    };
-
     let startValidation = (ngWordManager, validatorManager) => {
       ngWordManager.fetchConfig()
         .then(
@@ -258,7 +246,15 @@
         });
     };
 
-    runUserScript();
+    if (ngWordManager.isConfigURLEmpty()) {
+      let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
+
+      ngWordManager.configURL = configURL;
+    }
+
+    if (!ngWordManager.isConfigURLEmpty()) {
+      startValidation(ngWordManager, validatorManager);
+    }
   } else {
     module.exports = {
       ValidatorManager: ValidatorManager,
