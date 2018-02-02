@@ -344,7 +344,7 @@ describe('NGWordValidator', () => {
   });
 
   describe('createConfirmText', () => {
-    let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).html();
+    let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
     let expectedText = 'testmessage';
 
     it('returns confirm text', () => {
