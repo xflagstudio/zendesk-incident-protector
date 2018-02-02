@@ -126,6 +126,10 @@
       }
     }
     fetchConfig() {
+      if (this.config !== undefined) {
+        return Promise.resolve(this.config);
+      }
+
       return new Promise((resolve, reject) => {
         this.request
           .get(this.configURL)
@@ -255,6 +259,22 @@
     if (!ngWordManager.isConfigURLEmpty()) {
       startValidation(ngWordManager, validatorManager);
     }
+
+    // override history.pushState
+    // in order to hook startValidation when history.pushState called
+    (function(history) {
+      let pushState = history.pushState;
+
+      history.pushState = function(state) {
+        // path is set in third argument of history.pushState
+        // ref. https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method
+        const path = arguments[2];
+
+        startValidation(ngWordManager, validatorManager);
+
+        return pushState.apply(history, arguments);
+      };
+    })(window.history);
   } else {
     module.exports = {
       ValidatorManager: ValidatorManager,
