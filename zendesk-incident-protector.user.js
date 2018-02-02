@@ -215,13 +215,18 @@
 
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
-    const localStorageKey = 'zendeskIncidentProtectorConfigURL';
-    const host            = location.host;
+    const localStorageKey  = 'zendeskIncidentProtectorConfigURL';
+    const host             = location.host;
+    const targetPathRegExp = /agent\/tickets/;
 
     let ngWordManager    = new NGWordManager(localStorageKey);
     let validatorManager = new ValidatorManager();
 
-    let startValidation = (ngWordManager, validatorManager) => {
+    let startValidation = (ngWordManager, validatorManager, path) => {
+      if (!targetPathRegExp.test(path)) {
+        return;
+      }
+
       ngWordManager.fetchConfig()
         .then(
           (object) => {
@@ -257,7 +262,7 @@
     }
 
     if (!ngWordManager.isConfigURLEmpty()) {
-      startValidation(ngWordManager, validatorManager);
+      startValidation(ngWordManager, validatorManager, location.href);
     }
 
     // override history.pushState
@@ -270,7 +275,7 @@
         // ref. https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method
         const path = arguments[2];
 
-        startValidation(ngWordManager, validatorManager);
+        startValidation(ngWordManager, validatorManager, path);
 
         return pushState.apply(history, arguments);
       };
