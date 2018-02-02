@@ -103,15 +103,20 @@
       this._config = arg;
     }
 
-    isConfigURLEmpty() {
-      let configURL = localStorage.getItem(this.localStorageKey);
-      return configURL === null;
+    get configURL() {
+      return localStorage.getItem(this.localStorageKey);
     }
-    setConfigURL(arg) {
+
+    set configURL(arg) {
       if (this.isValidConfigURL(arg)) {
         localStorage.setItem(this.localStorageKey, arg);
       }
     }
+
+    isConfigURLEmpty() {
+      return this.configURL === null;
+    }
+
     isValidConfigURL(arg) {
       try {
         let url = new URL(arg);
@@ -121,11 +126,9 @@
       }
     }
     fetchConfig() {
-      let configURL = localStorage.getItem(this.localStorageKey);
-
       return new Promise((resolve, reject) => {
         this.request
-          .get(configURL)
+          .get(this.configURL)
           .then(function(response) {
             resolve(response.body);
           })

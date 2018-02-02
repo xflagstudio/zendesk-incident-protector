@@ -173,21 +173,17 @@ describe('NGWordManager', () => {
     });
   });
 
-  describe('#setConfigURL', () => {
+  describe('#set configURL', () => {
     context('arg is URL', () => {
       it('should set arg to localStorage', () => {
-        let arg = configURL;
-
-        ngWordManager.setConfigURL(arg);
-        window.localStorage.getItem(localStorageKey).should.equal(arg);
+        ngWordManager.configURL = configURL;
+        window.localStorage.getItem(localStorageKey).should.equal(configURL);
       });
     });
 
     context('arg is not URL', () => {
       it('does not set localStorage', () => {
-        let arg = 'not url';
-
-        ngWordManager.setConfigURL(arg);
+        ngWordManager.configURL = 'not url';
         should.equal(window.localStorage.getItem(localStorageKey), null);
       });
     });
@@ -209,7 +205,7 @@ describe('NGWordManager', () => {
 
   describe('fetchConfig', () => {
     beforeEach(() => {
-      ngWordManager.setConfigURL(configURL);
+      ngWordManager.configURL = configURL;
     });
 
     context('GET config has been successfully finished', () => {
