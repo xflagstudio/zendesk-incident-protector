@@ -43,6 +43,12 @@
     });
   }
 
+  class NotTargetHost extends Error {
+    constructor(message) {
+      super(message);
+    }
+  }
+
   // NOTE:
   // Zendesk dashboard can show multiple tickets by separating tabs.
   // This class manages whether to set validator or not with each tabs
@@ -97,15 +103,20 @@
       this._config = arg;
     }
 
-    isConfigURLEmpty() {
-      let configURL = localStorage.getItem(this.localStorageKey);
-      return configURL === null;
+    get configURL() {
+      return localStorage.getItem(this.localStorageKey);
     }
-    setConfigURL(arg) {
+
+    set configURL(arg) {
       if (this.isValidConfigURL(arg)) {
         localStorage.setItem(this.localStorageKey, arg);
       }
     }
+
+    isConfigURLEmpty() {
+      return this.configURL === null;
+    }
+
     isValidConfigURL(arg) {
       try {
         let url = new URL(arg);
@@ -115,11 +126,13 @@
       }
     }
     fetchConfig() {
-      let configURL = localStorage.getItem(this.localStorageKey);
+      if (this.config !== undefined) {
+        return Promise.resolve(this.config);
+      }
 
       return new Promise((resolve, reject) => {
         this.request
-          .get(configURL)
+          .get(this.configURL)
           .then(function(response) {
             resolve(response.body);
           })
@@ -196,47 +209,77 @@
       let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
       let suffix = '\n\n本当に送信しますか？';
 
-      let rawText = $(text).text();
-
-      return prefix + rawText + suffix;
+      return prefix + text + suffix;
     }
   }
 
   // execute UserScript on browser, and export NGWordManager class on test
   if (typeof window === 'object') {
-    const localStorageKey = 'zendeskIncidentProtectorConfigURL';
-    const host            = location.host;
+    const localStorageKey  = 'zendeskIncidentProtectorConfigURL';
+    const host             = location.host;
+    const targetPathRegExp = /agent\/tickets/;
 
     let ngWordManager    = new NGWordManager(localStorageKey);
     let validatorManager = new ValidatorManager();
 
-    let runUserScript = () => {
-      if (ngWordManager.isConfigURLEmpty()) {
-        let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
-
-        ngWordManager.setConfigURL(configURL);
-      } else {
-        ngWordManager.fetchConfig()
-          .then(
-            (object) => {
-              ngWordManager.config = object;
-
-              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
-            }
-          ).then(
-            (object) => {
-              console.log('submit button loaded!');
-
-              const targetWords = ngWordManager.toTargetWords(host);
-              validatorManager.addValidator(targetWords);
-            }
-          ).catch(
-            (error) => { alert(error.message); }
-          );
+    let startValidation = (ngWordManager, validatorManager, path) => {
+      if (!targetPathRegExp.test(path)) {
+        return;
       }
+
+      ngWordManager.fetchConfig()
+        .then(
+          (object) => {
+            ngWordManager.config = object;
+
+            if (ngWordManager.isTargetHost(host)) {
+              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+            } else {
+              return Promise.reject(new NotTargetHost());
+            }
+          }
+        ).then(
+          (object) => {
+            console.log('submit button loaded!');
+
+            const targetWords = ngWordManager.toTargetWords(host);
+            validatorManager.addValidator(targetWords);
+          }
+        )
+        .catch((error) => {
+          if (error instanceof NotTargetHost) {
+            console.log('This zendesk instance is not target host for validation.');
+          } else {
+            alert(error.message);
+          }
+        });
     };
 
-    runUserScript();
+    if (ngWordManager.isConfigURLEmpty()) {
+      let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
+
+      ngWordManager.configURL = configURL;
+    }
+
+    if (!ngWordManager.isConfigURLEmpty()) {
+      startValidation(ngWordManager, validatorManager, location.href);
+    }
+
+    // override history.pushState
+    // in order to hook startValidation when history.pushState called
+    (function(history) {
+      let pushState = history.pushState;
+
+      history.pushState = function(state) {
+        // path is set in third argument of history.pushState
+        // ref. https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method
+        const path = arguments[2];
+
+        startValidation(ngWordManager, validatorManager, path);
+
+        return pushState.apply(history, arguments);
+      };
+    })(window.history);
   } else {
     module.exports = {
       ValidatorManager: ValidatorManager,
