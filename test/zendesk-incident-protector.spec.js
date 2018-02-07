@@ -8,11 +8,11 @@ let assert       = require('assert');
 let jsdom        = require('jsdom');
 let should       = chai.should();
 
-let exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
+const exportedClass = require(path.join(__dirname, '..', 'zendesk-incident-protector.user.js'));
 
-let ValidatorManager = exportedClass.ValidatorManager;
-let NGWordManager    = exportedClass.NGWordManager;
-let NGWordValidator  = exportedClass.NGWordValidator;
+const ValidatorManager = exportedClass.ValidatorManager;
+const NGWordManager    = exportedClass.NGWordManager;
+const NGWordValidator  = exportedClass.NGWordValidator;
 
 const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
@@ -100,7 +100,7 @@ describe('ValidatorManager', () => {
   describe('hasValidator', () => {
     context('before adding validator', () => {
       it('returns false', () => {
-        let buttonId = expectedButtonId;
+        const buttonId = expectedButtonId;
         validatorManager.hasValidator(buttonId).should.equal(false);
       });
     });
@@ -115,14 +115,14 @@ describe('ValidatorManager', () => {
 
       context('with added button id', () => {
         it('returns true', () => {
-          let buttonId = expectedButtonId;
+          const buttonId = expectedButtonId;
           validatorManager.hasValidator(buttonId).should.equal(true);
         });
       });
 
       context('with not added button id', () => {
         it('returns false', () => {
-          let buttonId = 'unknown';
+          const buttonId = 'unknown';
           validatorManager.hasValidator(buttonId).should.equal(false);
         });
       });
@@ -236,7 +236,7 @@ describe('NGWordManager', () => {
       });
 
       it('throws error', (done) => {
-        let expectedMessage = '[Zendesk 事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。';
+        const expectedMessage = '[Zendesk 事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。';
 
         ngWordManager.fetchConfig()
           .then((object) => {
@@ -255,8 +255,8 @@ describe('NGWordManager', () => {
 
       context('target words at host is defined', () => {
         it('returns target words defined on common and host', () => {
-          let host = 'aaa.zendesk.com';
-          let expected = ['test', 'memo', '(aaa|xxx)'];
+          const host = 'aaa.zendesk.com';
+          const expected = ['test', 'memo', '(aaa|xxx)'];
 
           ngWordManager.toTargetWords(host).should.eql(expected);
         });
@@ -264,8 +264,8 @@ describe('NGWordManager', () => {
 
       context('target words at host is not defined', () => {
         it('returns target words defined on common', () => {
-          let host = 'ddd.zendesk.com';
-          let expected = ['test', 'memo'];
+          const host = 'ddd.zendesk.com';
+          const expected = ['test', 'memo'];
 
           ngWordManager.toTargetWords(host).should.eql(expected);
         });
@@ -279,7 +279,7 @@ describe('NGWordManager', () => {
     });
 
     context('host defined in config', () => {
-      let host = 'aaa.zendesk.com';
+      const host = 'aaa.zendesk.com';
 
       it('returns true', () => {
         ngWordManager.isTargetHost(host).should.equal(true);
@@ -287,7 +287,7 @@ describe('NGWordManager', () => {
     });
 
     context('host not defined in config', () => {
-      let host = 'unknown.zendesk.com';
+      const host = 'unknown.zendesk.com';
 
       it('returns false', () => {
         ngWordManager.isTargetHost(host).should.equal(false);
@@ -333,11 +333,11 @@ describe('NGWordValidator', () => {
 
   describe('isIncludeTargetWord', () => {
     // text with word in common target words
-    let text1 = 'test hogehoge';
+    const text1 = 'test hogehoge';
     // text with word in target words of aaa.zendesk.com
-    let text2 = '(aaa|xxx) hogehoge';
+    const text2 = '(aaa|xxx) hogehoge';
     // text without target words
-    let text3 = 'aaa hogehoge';
+    const text3 = 'aaa hogehoge';
 
     it('judges target words', () => {
       ngWordValidator.isIncludeTargetWord(text1).should.equal(true);
@@ -347,11 +347,11 @@ describe('NGWordValidator', () => {
   });
 
   describe('createConfirmText', () => {
-    let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
-    let expectedText = 'testmessage';
+    const text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+    const expectedText = 'testmessage';
 
     it('returns confirm text', () => {
-      let confirmText = ngWordValidator.createConfirmText(text);
+      const confirmText = ngWordValidator.createConfirmText(text);
 
       confirmText.includes(expectedText).should.equal(true);
     });

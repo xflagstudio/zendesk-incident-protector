@@ -127,7 +127,7 @@
 
     isValidConfigURL(arg) {
       try {
-        let url = new URL(arg);
+        const url = new URL(arg);
         return true;
       } catch (e) {
         return false;
@@ -203,13 +203,13 @@
       let preventEvent = true;
 
       $(that.targetDOM).on('click', function(event) {
-        let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+        const text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
 
         if (that.isPublicResponse() && that.isIncludeTargetWord(text) && preventEvent) {
           event.preventDefault();
           event.stopPropagation();
 
-          let confirmText = that.createConfirmText(text);
+          const confirmText = that.createConfirmText(text);
 
           if (!confirm(confirmText)) {
             return false;
@@ -223,8 +223,8 @@
     }
 
     isPublicResponse() {
-      let publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
-      let commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+      const publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
+      const commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
 
       return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
@@ -234,8 +234,8 @@
     }
 
     createConfirmText(text) {
-      let prefix = NGWordValidator.CONFIRM_TEXT.prefix[this.locale];
-      let suffix = NGWordValidator.CONFIRM_TEXT.suffix[this.locale];
+      const prefix = NGWordValidator.CONFIRM_TEXT.prefix[this.locale];
+      const suffix = NGWordValidator.CONFIRM_TEXT.suffix[this.locale];
 
       return prefix + text + suffix;
     }
