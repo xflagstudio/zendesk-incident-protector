@@ -75,7 +75,7 @@ describe('ValidatorManager', () => {
     // NOTE:
     // mock $.fn.filter, because :visible is not supported in jsdom
     // ref. https://github.com/tmpvar/jsdom/issues/1048
-    stub.returns($(ValidatorManager.UI_CONSTANTS.selector.submitButton));
+    stub.returns($(ValidatorManager.UI_CONSTANTS.selector.buttonArea));
   });
 
   describe('getButtonId', () => {
@@ -291,7 +291,7 @@ describe('NGWordManager', () => {
 });
 
 describe('NGWordValidator', () => {
-  const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.submitButton;
+  const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.buttonArea;
   const targetWords = ['test', 'memo', '(aaa|xxx)']
 
   let ngWordValidator;

@@ -61,14 +61,14 @@
     static get UI_CONSTANTS() {
       return {
         selector: {
-          submitButton: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons button'
+          buttonArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons'
         }
       };
     }
 
     getButtonId() {
-      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.submitButton).filter(':visible');
-      return submitButton.parent().attr('id');
+      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.buttonArea).filter(':visible');
+      return submitButton.attr('id');
     }
 
     addValidator(targetWords) {
@@ -77,7 +77,7 @@
         this.idsWithValidator.push(buttonId);
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.submitButton}:visible`, targetWords);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}:visible`, targetWords);
         validator.run();
 
         return validator;
