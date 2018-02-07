@@ -88,8 +88,9 @@ describe('ValidatorManager', () => {
     it('adds button id into idsWithValidator', () => {
       const targetWords = ['test', 'memo', '(aaa|xxx)'];
       const buttonId    = expectedButtonId;
+      const locale      = 'ja';
 
-      let validator = validatorManager.addValidator(targetWords, buttonId);
+      let validator = validatorManager.addValidator(targetWords, buttonId, locale);
 
       (validator instanceof NGWordValidator).should.equal(true);
       validatorManager.idsWithValidator.should.contain(expectedButtonId);
@@ -131,6 +132,7 @@ describe('ValidatorManager', () => {
 
 describe('NGWordManager', () => {
   const localStorageKey = 'testLocalStorageKey';
+  const locale          = 'ja';
   const configDomain    = 'https://path.to';
   const configPath      = '/config.json';
   const configURL       = configDomain + configPath;
@@ -152,7 +154,7 @@ describe('NGWordManager', () => {
   let ngWordManager;
 
   beforeEach(() => {
-    ngWordManager = new NGWordManager(localStorageKey);
+    ngWordManager = new NGWordManager(localStorageKey, locale);
   });
 
   afterEach(() => {
@@ -234,7 +236,7 @@ describe('NGWordManager', () => {
       });
 
       it('throws error', (done) => {
-        let expectedMessage = '[Zendesk事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。';
+        let expectedMessage = '[Zendesk 事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。';
 
         ngWordManager.fetchConfig()
           .then((object) => {
@@ -297,11 +299,12 @@ describe('NGWordManager', () => {
 describe('NGWordValidator', () => {
   const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.buttonArea;
   const targetWords = ['test', 'memo', '(aaa|xxx)']
+  const locale      = 'ja';
 
   let ngWordValidator;
 
   beforeEach(() => {
-    ngWordValidator = new NGWordValidator(targetDOM, targetWords);
+    ngWordValidator = new NGWordValidator(targetDOM, targetWords, locale);
   });
 
   describe('isPublicResponse', () => {

@@ -78,13 +78,13 @@
       return submitButton.attr('id');
     }
 
-    addValidator(targetWords, buttonId) {
+    addValidator(targetWords, buttonId, locale) {
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
 
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}[id='${buttonId}'] button`, targetWords);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}[id='${buttonId}'] button`, targetWords, locale);
         validator.run();
 
         return validator;
@@ -97,9 +97,10 @@
   }
 
   class NGWordManager {
-    constructor(localStorageKey) {
+    constructor(localStorageKey, locale) {
       this.localStorageKey = localStorageKey;
       this.request         = window.superagent;
+      this.locale          = locale;
     }
 
     get config() {
@@ -133,6 +134,12 @@
       }
     }
     fetchConfig() {
+      const errorMessage = {
+        'ja': '[Zendesk 事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。',
+        'en': '[Zendesk Incident Protector]\n\nCan not get configuration file.\nPlease notify to developer if this occurs repeatedly.'
+      };
+      let that = this;
+
       if (this.config !== undefined) {
         return Promise.resolve(this.config);
       }
@@ -144,7 +151,7 @@
             resolve(response.body);
           })
           .catch(function(error) {
-            reject(new Error('[Zendesk事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。'));
+            reject(new Error(errorMessage[that.locale]));
           });
       });
     }
@@ -160,9 +167,10 @@
   }
 
   class NGWordValidator {
-    constructor(targetDOM, targetWords) {
+    constructor(targetDOM, targetWords, locale) {
       this.targetDOM   = targetDOM;
       this.targetWords = targetWords;
+      this.locale      = locale;
     }
 
     static get UI_CONSTANTS() {
@@ -175,6 +183,19 @@
           publicCommentClass: 'track-id-publicComment'
         }
       };
+    }
+
+    static get CONFIRM_TEXT() {
+      return {
+        prefix: {
+          'ja': '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n',
+          'en': 'Below contents may include inappropriate words for public reply.\n\n'
+        },
+        suffix: {
+          'ja': '\n\n本当に送信しますか？',
+          'en': '\n\nARE YOU REALLY SEND THIS TO CUSTOMER?'
+        }
+      }
     }
 
     run() {
@@ -213,8 +234,8 @@
     }
 
     createConfirmText(text) {
-      let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
-      let suffix = '\n\n本当に送信しますか？';
+      let prefix = NGWordValidator.CONFIRM_TEXT.prefix[this.locale];
+      let suffix = NGWordValidator.CONFIRM_TEXT.suffix[this.locale];
 
       return prefix + text + suffix;
     }
@@ -225,8 +246,9 @@
     const localStorageKey  = 'zendeskIncidentProtectorConfigURL';
     const host             = location.host;
     const targetPathRegExp = /agent\/tickets/;
+    const locale           = window.navigator.language.match(/ja/) ? 'ja' : 'en';
 
-    let ngWordManager    = new NGWordManager(localStorageKey);
+    let ngWordManager    = new NGWordManager(localStorageKey, locale);
     let validatorManager = new ValidatorManager();
 
     let startValidation = (ngWordManager, validatorManager, path) => {
@@ -252,7 +274,7 @@
             const targetWords = ngWordManager.toTargetWords(host);
             const buttonId    = $(object).attr('id');
 
-            validatorManager.addValidator(targetWords, buttonId);
+            validatorManager.addValidator(targetWords, buttonId, locale);
           }
         )
         .catch((error) => {
@@ -267,7 +289,11 @@
     };
 
     if (ngWordManager.isConfigURLEmpty()) {
-      let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
+      const promptMessage = {
+        'ja': '[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください',
+        'en': '[Zendesk Incident Protector]\nPlease specify url which defined configuration of NG word.'
+      };
+      let configURL = window.prompt(promptMessage[locale], '');
 
       ngWordManager.configURL = configURL;
     }
