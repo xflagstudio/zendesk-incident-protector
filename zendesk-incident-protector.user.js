@@ -71,8 +71,7 @@
       return submitButton.attr('id');
     }
 
-    addValidator(targetWords) {
-      let buttonId = this.getButtonId();
+    addValidator(targetWords, buttonId) {
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
@@ -243,7 +242,9 @@
             console.log('submit button loaded!');
 
             const targetWords = ngWordManager.toTargetWords(host);
-            validatorManager.addValidator(targetWords);
+            const buttonId    = $(object).attr('id');
+
+            validatorManager.addValidator(targetWords, buttonId);
           }
         )
         .catch((error) => {

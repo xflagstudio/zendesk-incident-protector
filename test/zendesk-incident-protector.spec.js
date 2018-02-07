@@ -87,8 +87,9 @@ describe('ValidatorManager', () => {
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
       const targetWords = ['test', 'memo', '(aaa|xxx)'];
+      const buttonId    = expectedButtonId;
 
-      let validator = validatorManager.addValidator(targetWords);
+      let validator = validatorManager.addValidator(targetWords, buttonId);
 
       (validator instanceof NGWordValidator).should.equal(true);
       validatorManager.idsWithValidator.should.contain(expectedButtonId);
@@ -105,7 +106,10 @@ describe('ValidatorManager', () => {
 
     context('after adding validator', () => {
       beforeEach(() => {
-        validatorManager.addValidator();
+        const targetWords = ['test', 'memo', '(aaa|xxx)'];
+        const buttonId    = expectedButtonId;
+
+        validatorManager.addValidator(targetWords, buttonId);
       });
 
       context('with added button id', () => {
