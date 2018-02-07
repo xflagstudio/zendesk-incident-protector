@@ -193,7 +193,7 @@
         },
         suffix: {
           'ja': '\n\n本当に送信しますか？',
-          'en': '\n\nARE YOU REALLY SEND THIS TO CUSTOMER?'
+          'en': '\n\nDO YOU REALLY SEND THIS TO CUSTOMER?'
         }
       }
     }
