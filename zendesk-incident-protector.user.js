@@ -61,9 +61,16 @@
     static get UI_CONSTANTS() {
       return {
         selector: {
+          sectionPanel: 'section.main_panes:not([style*="display:none"]):not([style*="display: none"])',
           buttonArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons'
         }
       };
+    }
+
+    targetButtonAreaSelector() {
+      const idFilter = this.idsWithValidator.map(id => `:not([id='${id}'])`).join("");
+
+      return `${ValidatorManager.UI_CONSTANTS.selector.sectionPanel} ${ValidatorManager.UI_CONSTANTS.selector.buttonArea}${idFilter}`;
     }
 
     getButtonId() {
@@ -74,9 +81,10 @@
     addValidator(targetWords, buttonId) {
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
+
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}:visible`, targetWords);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}[id='${buttonId}'] button`, targetWords);
         validator.run();
 
         return validator;
@@ -232,7 +240,7 @@
             ngWordManager.config = object;
 
             if (ngWordManager.isTargetHost(host)) {
-              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+              return waitForElement(validatorManager.targetButtonAreaSelector());
             } else {
               return Promise.reject(new NotTargetHost());
             }
@@ -250,6 +258,8 @@
         .catch((error) => {
           if (error instanceof NotTargetHost) {
             console.log('This zendesk instance is not target host for validation.');
+          } else if (error.message.match(/Not found element/)) {
+            console.log('element of validatorManager.targetButtonAreaSelector does not found.');
           } else {
             alert(error.message);
           }
