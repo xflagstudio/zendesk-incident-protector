@@ -61,23 +61,30 @@
     static get UI_CONSTANTS() {
       return {
         selector: {
-          submitButton: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons button'
+          sectionPanel: 'section.main_panes:not([style*="display:none"]):not([style*="display: none"])',
+          buttonArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons'
         }
       };
     }
 
-    getButtonId() {
-      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.submitButton).filter(':visible');
-      return submitButton.parent().attr('id');
+    targetButtonAreaSelector() {
+      const idFilter = this.idsWithValidator.map(id => `:not([id='${id}'])`).join("");
+
+      return `${ValidatorManager.UI_CONSTANTS.selector.sectionPanel} ${ValidatorManager.UI_CONSTANTS.selector.buttonArea}${idFilter}`;
     }
 
-    addValidator(targetWords) {
-      let buttonId = this.getButtonId();
+    getButtonId() {
+      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.buttonArea).filter(':visible');
+      return submitButton.attr('id');
+    }
+
+    addValidator(targetWords, buttonId, locale) {
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
+
         console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
 
-        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.submitButton}:visible`, targetWords);
+        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}[id='${buttonId}'] button`, targetWords, locale);
         validator.run();
 
         return validator;
@@ -90,9 +97,10 @@
   }
 
   class NGWordManager {
-    constructor(localStorageKey) {
+    constructor(localStorageKey, locale) {
       this.localStorageKey = localStorageKey;
       this.request         = window.superagent;
+      this.locale          = locale;
     }
 
     get config() {
@@ -119,13 +127,19 @@
 
     isValidConfigURL(arg) {
       try {
-        let url = new URL(arg);
+        const url = new URL(arg);
         return true;
       } catch (e) {
         return false;
       }
     }
     fetchConfig() {
+      const errorMessage = {
+        'ja': '[Zendesk 事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。',
+        'en': '[Zendesk Incident Protector]\n\nCan not get configuration file.\nPlease notify to developer if this occurs repeatedly.'
+      };
+      let that = this;
+
       if (this.config !== undefined) {
         return Promise.resolve(this.config);
       }
@@ -137,7 +151,7 @@
             resolve(response.body);
           })
           .catch(function(error) {
-            reject(new Error('[Zendesk事故防止ツール]\n\n設定ファイルが取得できませんでした。\n継続して発生する場合は開発者にお知らせ下さい。'));
+            reject(new Error(errorMessage[that.locale]));
           });
       });
     }
@@ -153,9 +167,10 @@
   }
 
   class NGWordValidator {
-    constructor(targetDOM, targetWords) {
+    constructor(targetDOM, targetWords, locale) {
       this.targetDOM   = targetDOM;
       this.targetWords = targetWords;
+      this.locale      = locale;
     }
 
     static get UI_CONSTANTS() {
@@ -170,18 +185,31 @@
       };
     }
 
+    static get CONFIRM_TEXT() {
+      return {
+        prefix: {
+          'ja': '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n',
+          'en': 'Below contents may include inappropriate words for public reply.\n\n'
+        },
+        suffix: {
+          'ja': '\n\n本当に送信しますか？',
+          'en': '\n\nDO YOU REALLY SEND THIS TO CUSTOMER?'
+        }
+      }
+    }
+
     run() {
       const that = this;
       let preventEvent = true;
 
       $(that.targetDOM).on('click', function(event) {
-        let text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+        const text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
 
         if (that.isPublicResponse() && that.isIncludeTargetWord(text) && preventEvent) {
           event.preventDefault();
           event.stopPropagation();
 
-          let confirmText = that.createConfirmText(text);
+          const confirmText = that.createConfirmText(text);
 
           if (!confirm(confirmText)) {
             return false;
@@ -195,8 +223,8 @@
     }
 
     isPublicResponse() {
-      let publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
-      let commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
+      const publicCommentClass  = NGWordValidator.UI_CONSTANTS.attribute.publicCommentClass;
+      const commentActionTarget = $(NGWordValidator.UI_CONSTANTS.selector.commentActionTarget).attr('class');
 
       return !commentActionTarget ? false : commentActionTarget.includes(publicCommentClass);
     }
@@ -206,8 +234,8 @@
     }
 
     createConfirmText(text) {
-      let prefix = '以下の文章はパブリック返信にふさわしくないキーワードが含まれているおそれがあります。\n\n';
-      let suffix = '\n\n本当に送信しますか？';
+      const prefix = NGWordValidator.CONFIRM_TEXT.prefix[this.locale];
+      const suffix = NGWordValidator.CONFIRM_TEXT.suffix[this.locale];
 
       return prefix + text + suffix;
     }
@@ -218,8 +246,9 @@
     const localStorageKey  = 'zendeskIncidentProtectorConfigURL';
     const host             = location.host;
     const targetPathRegExp = /agent\/tickets/;
+    const locale           = window.navigator.language.match(/ja/) ? 'ja' : 'en';
 
-    let ngWordManager    = new NGWordManager(localStorageKey);
+    let ngWordManager    = new NGWordManager(localStorageKey, locale);
     let validatorManager = new ValidatorManager();
 
     let startValidation = (ngWordManager, validatorManager, path) => {
@@ -233,7 +262,7 @@
             ngWordManager.config = object;
 
             if (ngWordManager.isTargetHost(host)) {
-              return waitForElement(ValidatorManager.UI_CONSTANTS.selector.submitButton);
+              return waitForElement(validatorManager.targetButtonAreaSelector());
             } else {
               return Promise.reject(new NotTargetHost());
             }
@@ -243,12 +272,16 @@
             console.log('submit button loaded!');
 
             const targetWords = ngWordManager.toTargetWords(host);
-            validatorManager.addValidator(targetWords);
+            const buttonId    = $(object).attr('id');
+
+            validatorManager.addValidator(targetWords, buttonId, locale);
           }
         )
         .catch((error) => {
           if (error instanceof NotTargetHost) {
             console.log('This zendesk instance is not target host for validation.');
+          } else if (error.message.match(/Not found element/)) {
+            console.log('element of validatorManager.targetButtonAreaSelector does not found.');
           } else {
             alert(error.message);
           }
@@ -256,7 +289,11 @@
     };
 
     if (ngWordManager.isConfigURLEmpty()) {
-      let configURL = window.prompt('[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください', '');
+      const promptMessage = {
+        'ja': '[Zendesk 事故防止ツール]\nNGワードの設定が記載されたURLを指定してください',
+        'en': '[Zendesk Incident Protector]\nPlease specify url which defined configuration of NG word.'
+      };
+      let configURL = window.prompt(promptMessage[locale], '');
 
       ngWordManager.configURL = configURL;
     }
