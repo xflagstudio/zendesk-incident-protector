@@ -7,7 +7,7 @@ zendesk-incident-protector
 
 ## Description
 
-Userscript which is useful for prevent replying to customer with specific NG keywords on zendesk.
+Userscript which is useful for prevent replying to customer with specific NG keywords on Zendesk.
 
 ## Before to install
 
@@ -15,11 +15,11 @@ Userscript which is useful for prevent replying to customer with specific NG key
 
 [TamperMonkey](https://tampermonkey.net/) is required for this userscript.
 
-**Set up json file for configuration**
+**Set up JSON file for configuration**
 
-`zendesk-incident-protector.user.js` fetches configuration from json to define NG keywords.
+`zendesk-incident-protector.user.js` fetches configuration from JSON to define NG keywords.
 
-So you must set up json file to configure your protection settings. Here is an example.
+So you must set up JSON file to configure your protection settings. Here is an example.
 
 ```json
 {
@@ -38,9 +38,9 @@ So you must set up json file to configure your protection settings. Here is an e
 `zendesk-incident-protector.user.js` requires configuration with two attributes.
 
 * `hosts` : target hosts to protect.
-* `targetWords` : target words to trigger alert. Words will be selected from `common` attribute and matched zendesk host.
+* `targetWords` : target words to trigger alert. Words will be selected from `common` attribute and matched Zendesk host.
 
-Be sure to minify json before uploading.
+Be sure to minify JSON before uploading.
 
 ## Install
 
