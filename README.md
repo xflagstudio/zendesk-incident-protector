@@ -3,6 +3,7 @@ zendesk-incident-protector
 
 [![GitHub version](https://badge.fury.io/gh/xflagstudio%2Fzendesk-incident-protector.svg)](https://badge.fury.io/gh/xflagstudio%2Fzendesk-incident-protector)
 [![CircleCI](https://circleci.com/gh/xflagstudio/zendesk-incident-protector.svg?style=shield)](https://circleci.com/gh/xflagstudio/zendesk-incident-protector)
+![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)
 
 ## Description
 
