@@ -68,4 +68,4 @@ localStorage.removeItem("zendeskIncidentProtectorConfigURL");
 
 ## Author
 
-XFLAG Studio CRE Team
+[XFLAG Studio](https://career.xflag.com/) CRE Team
