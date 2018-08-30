@@ -1,6 +1,6 @@
 {
   "name": "zendesk-incident-protector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Prevent replying to customer with specific NG keywords",
   "main": "zendesk-incident-protector.user.js",
   "scripts": {

@@ -29,7 +29,7 @@ So you must set up JSON file to configure your protection settings. Here is an e
     ],
     "targetWords": {
         "common": ["hoge", "huga"],
-        "aaa.zendesk.com": ["piyo"],
+        "aaa.zendesk.com": ["piyo", "huga-\\d+"],
         "bbb.zendesk.com": ["moge"]
     }
 }
@@ -38,7 +38,7 @@ So you must set up JSON file to configure your protection settings. Here is an e
 `zendesk-incident-protector.user.js` requires configuration with two attributes.
 
 * `hosts` : target hosts to protect.
-* `targetWords` : target words to trigger alert. Words will be selected from `common` attribute and matched Zendesk host.
+* `targetWords` : target words to trigger alert. Words will be selected from `common` attribute and matched Zendesk host. You can also set regexp pattern. (In example, `huga-123` will trigger alert.)
 
 Be sure to minify JSON before uploading.
 

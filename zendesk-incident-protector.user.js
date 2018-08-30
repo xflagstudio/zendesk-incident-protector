@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Zendesk Incident Protector
-// @version        1.0.0
+// @version        1.0.1
 // @description    Prevent replying to customer with specific NG keywords
 // @author         XFLAG Studio CRE Team
 // @include        https://*.zendesk.com/*
@@ -238,7 +238,12 @@
     }
 
     isIncludeTargetWord(text) {
-      return this.targetWords.some(word => text.includes(word));
+      let isMatch = (pattern, text) => {
+        const regexp = new RegExp(pattern);
+        return regexp.test(text);
+      };
+
+      return this.targetWords.some(word => isMatch(word, text));
     }
 
     createConfirmText(text) {
