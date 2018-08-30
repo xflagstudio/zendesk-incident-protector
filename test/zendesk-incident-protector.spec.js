@@ -78,12 +78,6 @@ describe('ValidatorManager', () => {
     stub.returns($(ValidatorManager.UI_CONSTANTS.selector.buttonArea));
   });
 
-  describe('getButtonId', () => {
-    it('returns id of parent element of button', () => {
-      validatorManager.getButtonId().should.equal(expectedButtonId);
-    });
-  });
-
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
       const targetWords = ['test', 'memo', '(aaa|xxx)'];

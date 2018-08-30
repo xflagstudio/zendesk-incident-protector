@@ -73,11 +73,6 @@
       return `${ValidatorManager.UI_CONSTANTS.selector.sectionPanel} ${ValidatorManager.UI_CONSTANTS.selector.buttonArea}${idFilter}`;
     }
 
-    getButtonId() {
-      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.buttonArea).filter(':visible');
-      return submitButton.attr('id');
-    }
-
     addValidator(targetWords, buttonId, locale) {
       if (buttonId !== undefined && !this.hasValidator(buttonId)) {
         this.idsWithValidator.push(buttonId);
