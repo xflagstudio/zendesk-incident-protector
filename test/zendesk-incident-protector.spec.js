@@ -85,7 +85,7 @@ describe('ValidatorManager', () => {
 
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
-      const targetWords  = ['test', 'memo', '(aaa|xxx)'];
+      const targetWords  = ['test', 'memo', '(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'];
       const buttonViewId = expectedButtonViewId;
       const locale       = 'ja';
 
@@ -106,7 +106,7 @@ describe('ValidatorManager', () => {
 
     context('after adding validator', () => {
       beforeEach(() => {
-        const targetWords  = ['test', 'memo', '(aaa|xxx)'];
+        const targetWords  = ['test', 'memo', '(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'];
         const buttonViewId = expectedButtonViewId;
 
         validatorManager.addValidator(targetWords, buttonViewId);
@@ -144,7 +144,7 @@ describe('NGWordManager', () => {
     ],
     'targetWords': {
       'common': ['test', 'memo'],
-      'aaa.zendesk.com': ['(aaa|xxx)'],
+      'aaa.zendesk.com': ['(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'],
       'bbb.zendesk.com': ['bbb'],
       'ccc.zendesk.com': ['ccc']
     }
@@ -255,7 +255,7 @@ describe('NGWordManager', () => {
       context('target words at host is defined', () => {
         it('returns target words defined on common and host', () => {
           const host = 'aaa.zendesk.com';
-          const expected = ['test', 'memo', '(aaa|xxx)'];
+          const expected = ['test', 'memo', '(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'];
 
           ngWordManager.toTargetWords(host).should.eql(expected);
         });
@@ -297,7 +297,7 @@ describe('NGWordManager', () => {
 
 describe('NGWordValidator', () => {
   const targetDOM   = ValidatorManager.UI_CONSTANTS.selector.buttonArea;
-  const targetWords = ['test', 'memo', '(aaa|xxx)']
+  const targetWords = ['test', 'memo', '(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'];
   const locale      = 'ja';
 
   let ngWordValidator;
@@ -334,14 +334,22 @@ describe('NGWordValidator', () => {
     // text with word in common target words
     const text1 = 'test hogehoge';
     // text with word in target words of aaa.zendesk.com
-    const text2 = '(aaa|xxx) hogehoge';
+    const text2 = 'aaa hogehoge';
+    const text3 = 'xxx hogehoge';
+    const text4 = 'HOGE-1234 hogehoge';
+    const text5 = '(bbb|yyy) hogehoge';
     // text without target words
-    const text3 = 'aaa hogehoge';
+    const text6 = 'HOGE- hogehoge';
+    const text7 = 'bbb hogehoge';
 
     it('judges target words', () => {
       ngWordValidator.isIncludeTargetWord(text1).should.equal(true);
       ngWordValidator.isIncludeTargetWord(text2).should.equal(true);
-      ngWordValidator.isIncludeTargetWord(text3).should.equal(false);
+      ngWordValidator.isIncludeTargetWord(text3).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text4).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text5).should.equal(true);
+      ngWordValidator.isIncludeTargetWord(text6).should.equal(false);
+      ngWordValidator.isIncludeTargetWord(text7).should.equal(false);
     });
   });
 

@@ -238,7 +238,12 @@
     }
 
     isIncludeTargetWord(text) {
-      return this.targetWords.some(word => text.includes(word));
+      let isMatch = (pattern, text) => {
+        const regexp = new RegExp(pattern);
+        return regexp.test(text);
+      };
+
+      return this.targetWords.some(word => isMatch(word, text));
     }
 
     createConfirmText(text) {
