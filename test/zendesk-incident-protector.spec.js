@@ -37,10 +37,14 @@ const defaultDOM = new JSDOM(`
 <!-- submit button -->
 <footer class="ticket-resolution-footer">
   <div class="ticket-resolution-footer-pane">
-    <div id="ember1234" class="ticket_submit_buttons">
-      <button class="save">
-      submit
-      </button>
+    <div id="ember1234" class="ember-view">
+      <div dir="ltr">
+        <div class="LRf LRg LRh LRi LRj">
+          <div data-garden-id="buttons.button_group_view" data-garden-version="3.4.0" class="ButtonGroupView-hogehoge index__l-btn-group___hugahuga" dir="ltr">
+            <button class="save">submit</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </footer>
@@ -67,7 +71,7 @@ window.localStorage = global.localStorage;
 
 describe('ValidatorManager', () => {
   const stub = sinon.stub($, 'filter');
-  const expectedButtonId = 'ember1234';
+  const expectedButtonViewId = 'ember1234';
 
   beforeEach(() => {
     validatorManager = new ValidatorManager();
@@ -80,44 +84,44 @@ describe('ValidatorManager', () => {
 
   describe('addValidator', () => {
     it('adds button id into idsWithValidator', () => {
-      const targetWords = ['test', 'memo', '(aaa|xxx)'];
-      const buttonId    = expectedButtonId;
-      const locale      = 'ja';
+      const targetWords  = ['test', 'memo', '(aaa|xxx)'];
+      const buttonViewId = expectedButtonViewId;
+      const locale       = 'ja';
 
-      let validator = validatorManager.addValidator(targetWords, buttonId, locale);
+      let validator = validatorManager.addValidator(targetWords, buttonViewId, locale);
 
       (validator instanceof NGWordValidator).should.equal(true);
-      validatorManager.idsWithValidator.should.contain(expectedButtonId);
+      validatorManager.idsWithValidator.should.contain(expectedButtonViewId);
     });
   });
 
   describe('hasValidator', () => {
     context('before adding validator', () => {
       it('returns false', () => {
-        const buttonId = expectedButtonId;
-        validatorManager.hasValidator(buttonId).should.equal(false);
+        const buttonViewId = expectedButtonViewId;
+        validatorManager.hasValidator(buttonViewId).should.equal(false);
       });
     });
 
     context('after adding validator', () => {
       beforeEach(() => {
-        const targetWords = ['test', 'memo', '(aaa|xxx)'];
-        const buttonId    = expectedButtonId;
+        const targetWords  = ['test', 'memo', '(aaa|xxx)'];
+        const buttonViewId = expectedButtonViewId;
 
-        validatorManager.addValidator(targetWords, buttonId);
+        validatorManager.addValidator(targetWords, buttonViewId);
       });
 
       context('with added button id', () => {
         it('returns true', () => {
-          const buttonId = expectedButtonId;
-          validatorManager.hasValidator(buttonId).should.equal(true);
+          const buttonViewId = expectedButtonViewId;
+          validatorManager.hasValidator(buttonViewId).should.equal(true);
         });
       });
 
       context('with not added button id', () => {
         it('returns false', () => {
-          const buttonId = 'unknown';
-          validatorManager.hasValidator(buttonId).should.equal(false);
+          const buttonViewId = 'unknown';
+          validatorManager.hasValidator(buttonViewId).should.equal(false);
         });
       });
     });
