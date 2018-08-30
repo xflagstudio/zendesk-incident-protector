@@ -48,7 +48,8 @@ const defaultDOM = new JSDOM(`
     </div>
   </div>
 </footer>
-`);
+`,
+{ url: "http://localhost" });
 
 // mock URL class
 class URL {
@@ -156,8 +157,8 @@ describe('NGWordManager', () => {
   });
 
   afterEach(() => {
-    window.localStorage.clear();
-    window.localStorage.itemInsertionCallback = null;
+    global.localStorage.clear();
+    global.localStorage.itemInsertionCallback = null;
   });
 
   describe('#isConfigURLEmpty', () => {
@@ -168,7 +169,7 @@ describe('NGWordManager', () => {
     });
     context('localStorage exists', () => {
       before(() => {
-        window.localStorage.setItem(localStorageKey, configURL);
+        global.localStorage.setItem(localStorageKey, configURL);
       });
 
       it('should return false', () => {
@@ -181,14 +182,14 @@ describe('NGWordManager', () => {
     context('arg is URL', () => {
       it('should set arg to localStorage', () => {
         ngWordManager.configURL = configURL;
-        window.localStorage.getItem(localStorageKey).should.equal(configURL);
+        should.equal(ngWordManager.configURL, configURL);
       });
     });
 
     context('arg is not URL', () => {
       it('does not set localStorage', () => {
         ngWordManager.configURL = 'not url';
-        should.equal(window.localStorage.getItem(localStorageKey), null);
+        should.equal(ngWordManager.configURL, null);
       });
     });
   });
