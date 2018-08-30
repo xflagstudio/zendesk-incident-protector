@@ -62,7 +62,8 @@
       return {
         selector: {
           sectionPanel: 'section.main_panes:not([style*="display:none"]):not([style*="display: none"])',
-          buttonArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane div.ticket_submit_buttons'
+          footerPanelArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane',
+          buttonViewArea: 'div div div[class ^= "ButtonGroupView"]'
         }
       };
     }
@@ -70,24 +71,31 @@
     targetButtonAreaSelector() {
       const idFilter = this.idsWithValidator.map(id => `:not([id='${id}'])`).join("");
 
-      return `${ValidatorManager.UI_CONSTANTS.selector.sectionPanel} ${ValidatorManager.UI_CONSTANTS.selector.buttonArea}${idFilter}`;
+      return `${ValidatorManager.UI_CONSTANTS.selector.sectionPanel} ${ValidatorManager.UI_CONSTANTS.selector.footerPanelArea} div${idFilter} ${ValidatorManager.UI_CONSTANTS.selector.buttonViewArea}`;
     }
 
-    getButtonId() {
-      let submitButton = $(ValidatorManager.UI_CONSTANTS.selector.buttonArea).filter(':visible');
-      return submitButton.attr('id');
+    getButtonViewId(dom) {
+      // NOTE:
+      // get nearest id attribute on parent div.ember-view
+      return $(dom).parent().parent().parent().attr('id');
     }
 
-    addValidator(targetWords, buttonId, locale) {
-      if (buttonId !== undefined && !this.hasValidator(buttonId)) {
-        this.idsWithValidator.push(buttonId);
+    addValidator(targetWords, buttonViewId, locale) {
+      if (buttonViewId !== undefined && !this.hasValidator(buttonViewId)) {
+        this.idsWithValidator.push(buttonViewId);
 
-        console.log(`button id added. id:${buttonId} idsWithValidator:${this.idsWithValidator}`);
+        console.log(`button view with id:${buttonViewId} added. idsWithValidator:${this.idsWithValidator}`);
 
-        let validator = new NGWordValidator(`${ValidatorManager.UI_CONSTANTS.selector.buttonArea}[id='${buttonId}'] button`, targetWords, locale);
-        validator.run();
+        const buttonDOM = `${ValidatorManager.UI_CONSTANTS.selector.footerPanelArea} div#${buttonViewId} ${ValidatorManager.UI_CONSTANTS.selector.buttonViewArea} button`;
 
-        return validator;
+        let ngWordValidator = new NGWordValidator(buttonDOM, targetWords, locale);
+
+        ngWordValidator.run();
+
+        return ngWordValidator;
+      }
+      if (this.hasValidator(buttonViewId)) {
+        console.log(`button area with id:${buttonViewId} has been already set validator.`);
       }
     }
 
@@ -271,10 +279,10 @@
           (object) => {
             console.log('submit button loaded!');
 
-            const targetWords = ngWordManager.toTargetWords(host);
-            const buttonId    = $(object).attr('id');
+            const targetWords  = ngWordManager.toTargetWords(host);
+            const buttonViewId = validatorManager.getButtonViewId(object);
 
-            validatorManager.addValidator(targetWords, buttonId, locale);
+            validatorManager.addValidator(targetWords, buttonViewId, locale);
           }
         )
         .catch((error) => {
