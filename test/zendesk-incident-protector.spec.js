@@ -18,7 +18,7 @@ const { JSDOM } = jsdom;
 const defaultDOM = new JSDOM(`
 <!-- comment textarea -->
 <div class="comment_input_wrapper">
-  <div class="fr-focus">
+  <div class="comment_input">
     <div class="content">
       <div class="header">
         <span class="ember-view btn track-id-publicComment active"></span>
@@ -300,10 +300,26 @@ describe('NGWordValidator', () => {
   const targetWords = ['test', 'memo', '(aaa|xxx)', 'HOGE-\\d+', '\\(bbb\\|yyy\\)'];
   const locale      = 'ja';
 
+  // NOTE:
+  // mock UI_CONSTANTS, because :visible is not supported in jsdom
+  // ref. https://github.com/tmpvar/jsdom/issues/1048
+  const mockUIConstants = {
+    selector: {
+      commentActionTarget: 'div.comment_input_wrapper div.comment_input div.content div.header span.active',
+      commentTextArea: 'div.comment_input_wrapper div.comment_input div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
+    },
+    attribute: {
+      publicCommentClass: 'track-id-publicComment'
+    }
+  }
+
   let ngWordValidator;
 
   beforeEach(() => {
     ngWordValidator = new NGWordValidator(targetDOM, targetWords, locale);
+    sinon.stub(NGWordValidator, 'UI_CONSTANTS').get(function getterFn() {
+      return mockUIConstants;
+    });
   });
 
   describe('isPublicResponse', () => {
@@ -354,7 +370,7 @@ describe('NGWordValidator', () => {
   });
 
   describe('createConfirmText', () => {
-    const text = $(NGWordValidator.UI_CONSTANTS.selector.commentTextArea).text();
+    const text = $(mockUIConstants.selector.commentTextArea).text();
     const expectedText = 'testmessage';
 
     it('returns confirm text', () => {
