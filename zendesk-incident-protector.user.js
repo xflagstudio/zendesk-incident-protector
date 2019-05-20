@@ -184,8 +184,8 @@
     static get UI_CONSTANTS() {
       return {
         selector: {
-          commentActionTarget: 'div.comment_input_wrapper div.fr-focus div.content div.header span.active',
-          commentTextArea: 'div.comment_input_wrapper div.fr-focus div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
+          commentActionTarget: 'div.comment_input_wrapper div.comment_input:visible div.content div.header span.active',
+          commentTextArea: 'div.comment_input_wrapper div.comment_input:visible div.content div.body div.ember-view div.editor div.zendesk-editor--rich-text-comment'
         },
         attribute: {
           publicCommentClass: 'track-id-publicComment'
