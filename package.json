@@ -25,7 +25,7 @@
     "jsdom": "^12.0.0",
     "just-extend": ">=4.0.0",
     "lodash": ">=4.17.13",
-    "mocha": "^4.1.0",
+    "mocha": "^7.0.0",
     "mock-local-storage": "^1.0.5",
     "nock": "^9.1.6",
     "sinon": "^4.2.1",
