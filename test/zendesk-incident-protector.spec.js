@@ -38,13 +38,10 @@ const defaultDOM = new JSDOM(`
 <footer class="ticket-resolution-footer">
   <div class="ticket-resolution-footer-pane">
     <div id="ember1234" class="ember-view">
-      <div dir="ltr">
-        <div class="LRf LRg LRh LRi LRj">
-          <div data-garden-id="buttons.button_group_view" data-garden-version="3.4.0" class="ButtonGroupView-hogehoge index__l-btn-group___hugahuga" dir="ltr">
-            <button class="save">submit</button>
-          </div>
+      <div class="LRf LRu LRo LRv">
+        <div data-garden-id="buttons.button_group_view" data-garden-version="7.1.0" class="ButtonGroupView-bLVKCC index__l-btn-group___13ccZ">
+          <button class="save">submit</button>
         </div>
-      </div>
     </div>
   </div>
 </footer>

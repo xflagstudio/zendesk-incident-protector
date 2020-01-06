@@ -63,7 +63,7 @@
         selector: {
           sectionPanel: 'section.main_panes:not([style*="display:none"]):not([style*="display: none"])',
           footerPanelArea: 'footer.ticket-resolution-footer div.ticket-resolution-footer-pane',
-          buttonViewArea: 'div div div[class ^= "ButtonGroupView"]'
+          buttonViewArea: 'div div[class ^= "ButtonGroupView"]'
         }
       };
     }
@@ -77,7 +77,7 @@
     getButtonViewId(dom) {
       // NOTE:
       // get nearest id attribute on parent div.ember-view
-      return $(dom).parent().parent().parent().attr('id');
+      return $(dom).parent().parent().attr('id');
     }
 
     addValidator(targetWords, buttonViewId, locale) {
