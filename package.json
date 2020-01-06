@@ -28,7 +28,7 @@
     "mocha": "^7.0.0",
     "mock-local-storage": "^1.0.5",
     "nock": "^9.1.6",
-    "sinon": "^4.2.1",
+    "sinon": "^8.0.2",
     "superagent": "^3.8.2"
   },
   "dependencies": {}
