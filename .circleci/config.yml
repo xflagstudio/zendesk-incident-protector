@@ -3,6 +3,9 @@ jobs:
   build:
     docker:
       - image: circleci/node:8.9.3
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
     working_directory: ~/repo
     steps:
       - checkout
